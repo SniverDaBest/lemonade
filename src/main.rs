@@ -18,7 +18,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use blog_os::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    println!("Hello World{}", "!");
+    println!("Lemonade version 24m6");
     blog_os::init();
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
@@ -62,4 +62,21 @@ async fn example_task() {
 #[test_case]
 fn trivial_assertion() {
     assert_eq!(1, 1);
+}
+
+#[test_case]
+fn basic_math() {
+    let mut number = 0;
+    number = number + 2;
+    number = number - 1;
+    number = number * 42;
+    number = number / 6;
+    assert_eq!(number, 7);
+}
+
+#[test_case]
+fn string_modification() {
+    let mut word = "word";
+    word = "drow";
+    assert_ne!(word, "word");
 }
