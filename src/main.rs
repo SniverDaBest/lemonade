@@ -6,7 +6,6 @@
 
 extern crate alloc;
 
-use blog_os::command::command;
 use blog_os::task::keyboard::capture_keypresses;
 use blog_os::{print, println};
 use blog_os::task::{executor::Executor, keyboard, Task};
@@ -34,8 +33,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     let mut executor = Executor::new();
     executor.spawn(Task::new(example_task()));
-    //executor.spawn(Task::new(keyboard::print_keypresses()));
-    executor.spawn(Task::new(capture_keypresses()));
     executor.run();
 }
 
@@ -61,10 +58,6 @@ async fn count() {
     for i in 0..100000 {
         print!("{}, ", i);
     }
-}
-
-async fn print_all_keys() {
-    println!(keypress_storage);
 }
 
 async fn example_task() {
