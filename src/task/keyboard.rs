@@ -1,6 +1,5 @@
 use crate::{print, println};
 use conquer_once::spin::OnceCell;
-use spin::Mutex;
 use core::{
     pin::Pin,
     task::{Context, Poll},
@@ -11,7 +10,6 @@ use futures_util::{
     task::AtomicWaker,
 };
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
-use alloc::{string::String, vec::Vec};
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
 static WAKER: AtomicWaker = AtomicWaker::new();
@@ -86,63 +84,4 @@ pub async fn print_keypresses() {
             }
         }
     }
-}
-
-static LATEST_KEYPRESS: Mutex<Option<DecodedKey>> = Mutex::new(None);
-
-pub async fn capture_keypresses() {
-    let mut scancodes = ScancodeStream::new();
-    let mut keyboard = Keyboard::new(
-        ScancodeSet1::new(),
-        layouts::Us104Key,
-        HandleControl::Ignore,
-    );
-
-    while let Some(scancode) = scancodes.next().await {
-        if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-            if let Some(key) = keyboard.process_keyevent(key_event) {
-                let mut keypress_storage = LATEST_KEYPRESS.lock(); // Lock the mutex for writing
-                *keypress_storage = Some(key); // Store the keypress
-            }
-        }
-    }
-}
-
-pub fn get_latest_keypress() -> Option<DecodedKey> {
-    let keypress_storage = LATEST_KEYPRESS.lock(); // Lock the mutex for reading
-    keypress_storage.clone() // Return a clone of the keypress, leaving the original in place
-}
-
-pub async fn _get_async() -> String {
-    let mut scancodes = ScancodeStream::new();
-    let mut keyboard = Keyboard::new(
-        ScancodeSet1::new(),
-        layouts::Us104Key,
-        HandleControl::Ignore,
-    );
-
-    let mut chars = Vec::new();
-
-    while let Some(scancode) = scancodes.next().await {
-        if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-            if let Some(key) = keyboard.process_keyevent(key_event) {
-                match key {
-                    DecodedKey::Unicode(character) => {
-                        if character == '\n' {
-                            break;
-                        }
-                        chars.push(character as u8);
-                    },
-                    _ => {},
-                }
-            }
-        }
-    }
-
-    return String::from_utf8(chars).unwrap();
-}
-
-#[macro_export]
-macro_rules! get -> String {
-    return _get();
 }

@@ -1,5 +1,4 @@
 use core::fmt;
-use alloc::{string::{String, ToString}, vec::Vec};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
@@ -141,6 +140,14 @@ impl Writer {
         for col in 0..BUFFER_WIDTH {
             self.buffer.chars[row][col].write(blank);
         }
+    }
+
+    /// Clears the entire screen and resets the cursor position.
+    pub fn clear_screen(&mut self) {
+        for row in 0..BUFFER_HEIGHT {
+            self.clear_row(row);
+        }
+        self.column_position = 0;
     }
 }
 

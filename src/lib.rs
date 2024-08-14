@@ -16,11 +16,18 @@ pub mod memory;
 pub mod serial;
 pub mod task;
 pub mod vga_buffer;
+pub mod randomness;
+pub mod base64;
+pub mod command_line;
+//pub mod clock; // no workie D:
 
 pub fn init() {
     gdt::init();
     interrupts::init_idt();
+    //clock::initialize_pit();
     unsafe { interrupts::PICS.lock().initialize() };
+    //let mut idt = InterruptDescriptorTable::new();
+    //clock::init_idt(&mut idt);
     x86_64::instructions::interrupts::enable();
 }
 pub trait Testable {
@@ -47,7 +54,7 @@ pub fn test_runner(tests: &[&dyn Testable]) {
 }
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
+    serial_println!("[FAILED]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
     hlt_loop();
@@ -77,6 +84,7 @@ pub fn hlt_loop() -> ! {
 
 #[cfg(test)]
 use bootloader::{entry_point, BootInfo};
+use x86_64::structures::idt::InterruptDescriptorTable;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);

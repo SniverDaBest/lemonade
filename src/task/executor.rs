@@ -21,9 +21,9 @@ impl Executor {
     pub fn spawn(&mut self, task: Task) {
         let task_id = task.id;
         if self.tasks.insert(task.id, task).is_some() {
-            panic!("task with same ID already in tasks");
+            panic!("X_X\n\nTask with same ID already in tasks");
         }
-        self.task_queue.push(task_id).expect("queue full");
+        self.task_queue.push(task_id).expect("0_0\n\nQueue full");
     }
 
     pub fn run(&mut self) -> ! {
@@ -87,7 +87,7 @@ impl TaskWaker {
     }
 
     fn wake_task(&self) {
-        self.task_queue.push(self.task_id).expect("task_queue full");
+        self.task_queue.push(self.task_id).expect("0_0\n\nTask queue full");
     }
 }
 
