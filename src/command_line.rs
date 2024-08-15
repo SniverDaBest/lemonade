@@ -73,42 +73,27 @@ fn process_command(command: &str) {
         println!("{}", command.replace("echo ", ""));
     } else if command.trim().contains("clear") {
         WRITER.lock().clear_screen();
-    } else if command.trim().contains("ver") || command.trim().contains("version") {
+    } else if command.trim().contains("ver") {
         println!("LSH Version {}", LSH_VERSION);
     } else if command.trim().contains("b64encode") {
         let input_str = command.split_whitespace().nth(1).unwrap_or("").as_bytes();
-        let input_encoded = base64::encode(input_str);
-        match base64::encoded_to_string(input_encoded) {
-            Ok(encoded) => println!("Encoded: {}", encoded),
-            Err(e) => println!("Error encoding: {}", e),
-        }
+        println!("{}", base64::encode(input_str));
     } else if command.trim().contains("b64decode") {
         let input_str = command.split_whitespace().nth(1).unwrap_or("").as_bytes();
-        match base64::decode(input_str) {
-            Ok(decoded_input) => {
-                match base64::decoded_to_string(decoded_input) {
-                    Ok(result) => println!("{}", result),
-                    Err(e) => println!("(0_0)  Failed to turn decoded input into string: {}", e),
-                }
-            },
-            Err(e) => println!("(0_0)  Failed to decode input: {:?}", e),
-        }
+        println!("{}", base64::decode(input_str));
     } else if command.trim().contains("randint") {
         if let Some(seed_str) = command.split_whitespace().nth(1) {
-            if let Ok(seed) = seed_str.parse::<u32>() {
-                println!("{}", randomness::Xorshift32::new(seed).next());
-            } else {
-                println!("Invalid seed value.");
-            }
+            let seed: u32 = seed_str.parse().expect("-_-  Expected a number for seed");
+            println!("{}", randomness::gen_number(seed));
         } else {
-            println!("No seed provided.");
+            println!("-_-  No seed provided");
         }
     } else if command.trim().contains("help") {
         println!("LSH Version {}.", LSH_VERSION);
         println!("help -- Shows this message.");
         println!("echo [input] -- Echos user input.");
         println!("clear -- Clears the screen.");
-        println!("ver(sion) -- Shows the version of LSH. (currently running version {})", LSH_VERSION);
+        println!("ver -- Shows the version of LSH. (currently running version {})", LSH_VERSION);
         println!("b64encode [input] -- Encodes user input into Base64");
         println!("b64decode [base64] -- Decodes Base64 user input into normal text.");
         println!("randint [seed] -- Generates a random number based on a seed.");

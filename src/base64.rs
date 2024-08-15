@@ -1,6 +1,6 @@
-use alloc::string::{String, FromUtf8Error};
+use alloc::format;
+use alloc::string::{FromUtf8Error, String, ToString};
 use alloc::vec::Vec;
-use crate::println;
 
 // Base64 alphabet used for encoding
 const BASE64_ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -16,7 +16,7 @@ fn get_decode_table() -> [u8; 128] {
 }
 
 /// Encode function for Base64
-pub fn encode(input: &[u8]) -> [u8; 128] {
+pub fn encode_bytes(input: &[u8]) -> [u8; 128] {
     let mut output = [0; 128];
     let mut output_index = 0;
 
@@ -71,7 +71,7 @@ pub fn encode(input: &[u8]) -> [u8; 128] {
 }
 
 /// Decode function for Base64
-pub fn decode(input: &[u8]) -> Result<Vec<u8>, ()> {
+pub fn decode_bytes(input: &[u8]) -> Result<Vec<u8>, ()> {
     let mut output = Vec::new();
     let decode_table = get_decode_table();
 
@@ -126,4 +126,24 @@ pub fn encoded_to_string(encoded: [u8; 128]) -> Result<String, FromUtf8Error> {
 /// Convert the decoded byte vector to a String
 pub fn decoded_to_string(decoded: Vec<u8>) -> Result<String, FromUtf8Error> {
     String::from_utf8(decoded)
+}
+
+pub fn encode(bytes: &[u8]) -> String {
+    let encoded_input = encode_bytes(bytes);
+    match encoded_to_string(encoded_input) {
+        Ok(result) => return result,
+        Err(e) => return format!("0_0  An error occured when trying to encode! {}", e.to_string()),
+    }
+}
+
+pub fn decode(bytes: &[u8]) -> String {
+    match decode_bytes(bytes) {
+        Ok(decoded_input) => {
+            match decoded_to_string(decoded_input) {
+                Ok(result) => return result,
+                Err(e) => return format!("0_0  An error occured when trying to decode! {}", e.to_string()),
+            }
+        },
+        Err(e) => return format!("0_0  An error occured when trying to decode! {:?}", e).to_string(),
+    }
 }

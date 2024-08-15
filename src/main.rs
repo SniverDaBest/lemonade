@@ -12,7 +12,7 @@ use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use blog_os::randomness::Xorshift32;
 use blog_os::base64;
-use alloc::string::String;
+use alloc::string::{String, ToString};
 use blog_os::command_line::run_command_line;
 
 entry_point!(kernel_main);
@@ -108,25 +108,12 @@ fn randomness() {
 fn encoding_base64() {
     let input = b"Hello, world!";
     let expected = "SGVsbG8sIHdvcmxkIQ";
-    let encoded_input = base64::encode(input);
-    match base64::encoded_to_string(encoded_input) {
-        Ok(result) => assert_eq!(result, expected),
-        Err(e) => println!("(0_0)  Failed to turn encoded input into a string: {}", e),
-    }
+    assert_eq!(base64::encode(input), expected);
 }
 
 #[test_case]
 fn decoding_base64() {
     let input = b"SGVsbG8sIHdvcmxkIQ";
-    let expected = b"Hello, world!";
-    match base64::decode(input) {
-        Ok(decoded_input) => {
-            match base64::decoded_to_string(decoded_input) {
-                Ok(result) => assert_eq!(result, String::from_utf8_lossy(expected),),
-                Err(e) => println!("(0_0)  Failed to turn decoded input into string: {}", e),
-            }
-        },
-        Err(e) => println!("(0_0)  Failed to decode input: {:?}", e),
-    }
+    let expected = "Hello, world!";
+    assert_eq!(base64::decode(input), expected.to_string());
 }
-

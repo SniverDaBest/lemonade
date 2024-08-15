@@ -16,5 +16,9 @@ impl Xorshift32 {
         x
     }
 
-    pub fn gen_range() {}
+    pub fn gen_range() {
+
+    }
 }
+
+pub fn gen_number(seed: u32) -> u32 { return Xorshift32::new(seed).next(); }
