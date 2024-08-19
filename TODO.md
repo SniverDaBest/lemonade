@@ -1,9 +1,9 @@
 # Highest Priority
-- Work on LSH
 - Filesystem Access
 - Fix the dots
 
 # Medium Priority
+- Work on LSH
 - Add a GUI
     - Libs for external programs to interface with
     - Mouse support

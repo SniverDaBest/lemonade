@@ -6,14 +6,20 @@
 
 extern crate alloc;
 
-use blog_os::println;
-use blog_os::task::{executor::Executor, keyboard, Task};
+use blog_os::{
+    task::{
+        executor::Executor,
+        keyboard,
+        Task
+    },
+    randomness::Xorshift32, 
+    command_line::run_command_line,
+    base64,
+    println
+};
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
-use blog_os::randomness::Xorshift32;
-use blog_os::base64;
 use alloc::string::{String, ToString};
-use blog_os::command_line::run_command_line;
 
 entry_point!(kernel_main);
 
@@ -47,6 +53,7 @@ fn panic(info: &PanicInfo) -> ! {
     blog_os::hlt_loop();
 }
 
+/// This function is called on panic, while testing.
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {

@@ -11,10 +11,10 @@ use alloc::string::{String, ToString};
 use futures_util::stream::StreamExt;
 use pc_keyboard::{DecodedKey, Keyboard, ScancodeSet1};
 
-static LSH_VERSION: &str = "b0.1";
+static SHSH_VERSION: &str = "b0.1";
 
 pub async fn run_command_line() {
-    println!("Made by SniverDaBest\nLSH {}", LSH_VERSION);
+    println!("Made by SniverDaBest\nSHSH {}", SHSH_VERSION);
     let mut scancodes = keyboard::ScancodeStream::new();
     let mut keyboard = Keyboard::new(
         ScancodeSet1::new(),
@@ -66,7 +66,7 @@ fn redraw_input_buffer(input_buffer: &str) {
 
 fn process_command(command: &str) {
     // Implement command processing logic here
-    println!("Command received: {}", command);
+    // println!("Command received: {}", command); // debug statement that shouldn't always run
 
     // Example: simple echo command
     if command.trim().contains("echo") {
@@ -74,7 +74,7 @@ fn process_command(command: &str) {
     } else if command.trim().contains("clear") {
         WRITER.lock().clear_screen();
     } else if command.trim().contains("ver") {
-        println!("LSH Version {}", LSH_VERSION);
+        println!("SHSH Version {}", SHSH_VERSION);
     } else if command.trim().contains("b64encode") {
         let input_str = command.split_whitespace().nth(1).unwrap_or("").as_bytes();
         println!("{}", base64::encode(input_str));
@@ -89,11 +89,11 @@ fn process_command(command: &str) {
             println!("-_-  No seed provided");
         }
     } else if command.trim().contains("help") {
-        println!("LSH Version {}.", LSH_VERSION);
+        println!("LSH Version {}.", SHSH_VERSION);
         println!("help -- Shows this message.");
         println!("echo [input] -- Echos user input.");
         println!("clear -- Clears the screen.");
-        println!("ver -- Shows the version of LSH. (currently running version {})", LSH_VERSION);
+        println!("ver -- Shows the version of SHSH. (currently running version {})", SHSH_VERSION);
         println!("b64encode [input] -- Encodes user input into Base64");
         println!("b64decode [base64] -- Decodes Base64 user input into normal text.");
         println!("randint [seed] -- Generates a random number based on a seed.");

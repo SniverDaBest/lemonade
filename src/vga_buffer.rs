@@ -149,6 +149,16 @@ impl Writer {
         }
         self.column_position = 0;
     }
+
+    /// Get the height of the buffer
+    pub fn get_buffer_height() -> usize {
+        return BUFFER_HEIGHT;
+    }
+
+    /// Get the width of the buffer
+    pub fn get_buffer_width() -> usize {
+        return BUFFER_WIDTH;
+    }
 }
 
 impl fmt::Write for Writer {
