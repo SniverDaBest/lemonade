@@ -92,13 +92,18 @@ fn process_command(command: &str) {
     } else if command.trim().contains("pci") {
         for arg in command.split_whitespace() {
             if arg == "-h" || arg == "--help" {
-                println!("PCI Utility");
-                println!("-l/--list   -- Lists PCI devices.");
-                println!("-h/--help   -- Shows this message.");
+                println!("PCI(e) Utility");
+                println!("-l/--list -- Lists PCI devices.");
+                println!("-h/--help -- Shows this message.");
                 println!("-d/--device -- Only shows devices with provided device ID.");
                 println!("-v/--vendor -- Only shows devices with provided vendor ID.");
-                println!("-c/--class  -- Only shows devices with provided class code. -- UNIMPLEMENTED!!");
-                println!("-s/--sub    -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!");
+                println!("-c/--class -- Only shows devices with provided class code. -- UNIMPLEMENTED!!");
+                println!("-s/--sub -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!");
+                println!("-le/--list-pcie -- Lists PCIe devices. -- UNIMPLEMENTED!!");
+                println!("-de/--device-pcie -- Only shows PCIe devices with provided device ID. UNIMPLEMENTED!!");
+                println!("-ve/--vendor-pcie -- Only shows PCIe devices with provided vendor ID. UNIMPLEMENTED!!");
+                println!("-ce/--class-pcie -- Only shows PCIe devices with provided class code. UNIMPLEMENTED!!");
+                println!("-se/--sub-pcie -- Only shows PCIe devices with provided subclass. UNIMPLEMENTED!!");
                 break;
             } else if arg == "-l" || arg == "--list" {
                 let bus = pci::scan_pci_bus();
@@ -148,7 +153,7 @@ fn process_command(command: &str) {
         println!("b64encode [input] -- Encodes user input into Base64");
         println!("b64decode [base64] -- Decodes Base64 user input into normal text.");
         println!("randint [seed] -- Generates a random number based on a seed.");
-        println!("pci -- The PCI utility.");
+        println!("pci -- The PCI(e) utility.");
     } else {
         println!("Unknown command: {}", command);
     }
