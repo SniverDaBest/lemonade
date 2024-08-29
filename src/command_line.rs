@@ -12,7 +12,7 @@ use alloc::{string::{String, ToString}, vec::Vec};
 use futures_util::stream::StreamExt;
 use pc_keyboard::{DecodedKey, Keyboard, ScancodeSet1};
 
-static SHSH_VERSION: &str = "b0.1";
+static SHSH_VERSION: &str = "b0.2";
 
 pub async fn run_command_line() {
     println!("Made by SniverDaBest\nSHSH {}", SHSH_VERSION);
@@ -99,7 +99,6 @@ fn process_command(command: &str) {
                 println!("-v/--vendor -- Only shows devices with provided vendor ID.");
                 println!("-c/--class  -- Only shows devices with provided class code. -- UNIMPLEMENTED!!");
                 println!("-s/--sub    -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!");
-
                 break;
             } else if arg == "-l" || arg == "--list" {
                 let bus = pci::scan_pci_bus();
