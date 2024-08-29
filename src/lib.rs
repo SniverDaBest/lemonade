@@ -19,6 +19,7 @@ pub mod vga_buffer;
 pub mod randomness;
 pub mod base64;
 pub mod command_line;
+pub mod pci;
 //pub mod clock; // no workie D:
 
 pub fn init() {

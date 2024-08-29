@@ -40,6 +40,11 @@ version = "0.3.4"
 default-features = false
 features = ["alloc"]
 
+[dependencies.memchr]
+version = "2.7.4"
+default-features = false
+features = ["alloc"]
+
 [package.metadata.bootimage]
 test-args = [
     "-device",

@@ -5,9 +5,10 @@ use crate::{
     vga_buffer::WRITER,
     base64,
     randomness,
+    pci,
 };
-use core::future::Future;
-use alloc::string::{String, ToString};
+use core::{mem::drop,future::Future};
+use alloc::{string::{String, ToString}, vec::Vec};
 use futures_util::stream::StreamExt;
 use pc_keyboard::{DecodedKey, Keyboard, ScancodeSet1};
 
@@ -88,8 +89,59 @@ fn process_command(command: &str) {
         } else {
             println!("-_-  No seed provided");
         }
+    } else if command.trim().contains("pci") {
+        for arg in command.split_whitespace() {
+            if arg == "-h" || arg == "--help" {
+                println!("PCI Utility");
+                println!("-l/--list   -- Lists PCI devices.");
+                println!("-h/--help   -- Shows this message.");
+                println!("-d/--device -- Only shows devices with provided device ID.");
+                println!("-v/--vendor -- Only shows devices with provided vendor ID.");
+                println!("-c/--class  -- Only shows devices with provided class code. -- UNIMPLEMENTED!!");
+                println!("-s/--sub    -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!");
+
+                break;
+            } else if arg == "-l" || arg == "--list" {
+                let bus = pci::scan_pci_bus();
+                for x in bus { println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]); }
+            } else if arg == "-d" || arg == "--device" {
+                let mut t = 0;
+                for a in command.split_whitespace() {
+                    if a == "-d" || a == "--device" {
+                        t += 1;
+                        break;
+                    }
+                    t += 1;
+                }
+                let bus = pci::scan_pci_bus();
+                for x in bus {
+                    if x[1] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
+                    }
+                }
+            } else if arg == "-v" || arg == "--vendor" {
+                let mut t = 0;
+                for a in command.split_whitespace() {
+                    if a == "-v" || a == "--vendor" {
+                        t += 1;
+                        break;
+                    }
+                    t += 1;
+                }
+                let bus = pci::scan_pci_bus();
+                for x in bus {
+                    if x[0] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
+                    }
+                }
+            } else if arg == "-c" || arg == "--class" {
+                println!("-_-  This isn't implemented yet.");
+            } else if arg == "-s" || arg == "--sub" {
+                println!("-_-  This isn't implemented yet.")
+            }
+        }
     } else if command.trim().contains("help") {
-        println!("LSH Version {}.", SHSH_VERSION);
+        println!("SHSH Version {}.", SHSH_VERSION);
         println!("help -- Shows this message.");
         println!("echo [input] -- Echos user input.");
         println!("clear -- Clears the screen.");
@@ -97,6 +149,7 @@ fn process_command(command: &str) {
         println!("b64encode [input] -- Encodes user input into Base64");
         println!("b64decode [base64] -- Decodes Base64 user input into normal text.");
         println!("randint [seed] -- Generates a random number based on a seed.");
+        println!("pci -- The PCI utility.");
     } else {
         println!("Unknown command: {}", command);
     }
