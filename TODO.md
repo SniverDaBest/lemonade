@@ -3,7 +3,7 @@
 - Fix the dots
 
 # Medium Priority
-- Work on LSH
+- Work on SHSH
 - Add a GUI
     - Libs for external programs to interface with
     - Mouse support
