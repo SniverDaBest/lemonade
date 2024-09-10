@@ -6,6 +6,7 @@ use crate::{
     base64,
     randomness,
     pci,
+    disks,
 };
 use core::{mem::drop,future::Future};
 use alloc::{string::{String, ToString}, vec::Vec};
@@ -83,11 +84,9 @@ fn process_command(command: &str) {
         let input_str = command.split_whitespace().nth(1).unwrap_or("").as_bytes();
         println!("{}", base64::decode(input_str));
     } else if command.trim().contains("randint") {
-        if let Some(seed_str) = command.split_whitespace().nth(1) {
-            let seed: u32 = seed_str.parse().expect("-_-  Expected a number for seed");
-            println!("{}", randomness::gen_number(seed));
-        } else {
-            println!("-_-  No seed provided");
+        match randomness::rand_u64() {
+            Ok(val) => println!("{}", val.unwrap()),
+            Err(e) => println!("0_0  [randomness]: {}", e),
         }
     } else if command.trim().contains("pci") {
         for arg in command.split_whitespace() {
@@ -100,14 +99,15 @@ fn process_command(command: &str) {
                 println!("-c/--class -- Only shows devices with provided class code. -- UNIMPLEMENTED!!");
                 println!("-s/--sub -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!");
                 println!("-le/--list-pcie -- Lists PCIe devices. -- UNIMPLEMENTED!!");
-                println!("-de/--device-pcie -- Only shows PCIe devices with provided device ID. UNIMPLEMENTED!!");
-                println!("-ve/--vendor-pcie -- Only shows PCIe devices with provided vendor ID. UNIMPLEMENTED!!");
+                println!("-de/--device-pcie -- Only shows PCIe devices with provided device ID.");
+                println!("-ve/--vendor-pcie -- Only shows PCIe devices with provided vendor ID.");
                 println!("-ce/--class-pcie -- Only shows PCIe devices with provided class code. UNIMPLEMENTED!!");
                 println!("-se/--sub-pcie -- Only shows PCIe devices with provided subclass. UNIMPLEMENTED!!");
+                println!("NOTE: PCIe is broken :(");
                 break;
             } else if arg == "-l" || arg == "--list" {
                 let bus = pci::scan_pci_bus();
-                for x in bus { println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]); }
+                for x in bus { println!("{}", x); }
             } else if arg == "-d" || arg == "--device" {
                 let mut t = 0;
                 for a in command.split_whitespace() {
@@ -119,8 +119,8 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pci_bus();
                 for x in bus {
-                    if x[1] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
-                        println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
+                    if x.device_id == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("{}", x);
                     }
                 }
             } else if arg == "-v" || arg == "--vendor" {
@@ -134,15 +134,79 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pci_bus();
                 for x in bus {
+                    if x.vendor_id == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("{}", x);
+                    }
+                }
+            } else if arg == "-c" || arg == "--class" {
+                let mut t = 0;
+                for a in command.split_whitespace() {
+                    if a == "-c" || a == "--class" {
+                        t += 1;
+                        break;
+                    }
+                    t += 1;
+                }
+                let bus = pci::scan_pci_bus();
+                for x in bus {
+                    if x.class_code == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("{}", x);
+                    }
+                }
+            } else if arg == "-s" || arg == "--sub" {
+                let mut t = 0;
+                for a in command.split_whitespace() {
+                    if a == "-s" || a == "--sub" {
+                        t += 1;
+                        break;
+                    }
+                    t += 1;
+                }
+                let bus = pci::scan_pci_bus();
+                for x in bus {
+                    if x.subclass == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("{}", x);
+                    }
+                }
+            } else if arg == "-de" || arg == "--device-pcie" {
+                let mut t = 0;
+                for a in command.split_whitespace() {
+                    if a == "-de" || a == "--device-pcie" {
+                        t += 1;
+                        break;
+                    }
+                    t += 1;
+                }
+                let bus = pci::scan_pcie_bus();
+                for x in bus {
+                    if x[1] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                        println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
+                    }
+                }
+            } else if arg == "-ve" || arg == "--vendor-pcie" {
+                let mut t = 0;
+                for a in command.split_whitespace() {
+                    if a == "-ve" || a == "--vendor-pcie" {
+                        t += 1;
+                        break;
+                    }
+                    t += 1;
+                }
+                let bus = pci::scan_pcie_bus();
+                for x in bus {
                     if x[0] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
                         println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
                     }
                 }
-            } else if arg == "-c" || arg == "--class" {
-                println!("-_-  This isn't implemented yet.");
-            } else if arg == "-s" || arg == "--sub" {
-                println!("-_-  This isn't implemented yet.")
             }
+        }
+    } else if command.trim().contains("ahci") {
+        if command.trim().contains("-h") {
+            println!("AHCI Utility");
+            println!("-h -- Shows this help message.");
+            println!("-l -- Lists connected AHCI devices.");
+        } else if command.trim().contains("-l") {
+            disks::ahci::scan_for_ahci_controllers(true);
         }
     } else if command.trim().contains("help") {
         println!("SHSH Version {}.", SHSH_VERSION);
@@ -154,6 +218,7 @@ fn process_command(command: &str) {
         println!("b64decode [base64] -- Decodes Base64 user input into normal text.");
         println!("randint [seed] -- Generates a random number based on a seed.");
         println!("pci -- The PCI(e) utility.");
+        println!("ahci -- The AHCI utility.");
     } else {
         println!("Unknown command: {}", command);
     }

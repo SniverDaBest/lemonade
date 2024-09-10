@@ -11,4 +11,5 @@
 - Fix bug where clearing the screen too much breaks it
 
 # Low Priority
+- Implement true randomness, instead of a Xorshift.
 - Networking (not looking forward to this...)

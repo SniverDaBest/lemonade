@@ -12,14 +12,15 @@ use blog_os::{
         keyboard,
         Task
     },
-    randomness::Xorshift32, 
+    randomness::*, 
     command_line::run_command_line,
     base64,
-    println
+    println,
+    pci,
 };
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
-use alloc::string::{String, ToString};
+use alloc::{string::{String, ToString}, vec::Vec};
 
 entry_point!(kernel_main);
 
@@ -88,30 +89,6 @@ fn true_is_true() {
 }
 
 #[test_case]
-fn randomness() {
-    let mut rng = Xorshift32::new(4123);
-    
-    let expected_values: [u32; 10] = [
-        0x426D525A,
-        0xECEAAF69,
-        0x99FDAEAA,
-        0xA937EF7E,
-        0xCFD8A752,
-        0xBD63D3AB,
-        0x25CCD420,
-        0x5659FB04,
-        0x4E10BC98,
-        0x69F19B79,
-    ];
-
-    for &expected in &expected_values {
-        let result = rng.next();
-        assert_eq!(result, expected, "Expected {} but got {}.", expected, result);
-    }
-}
-
-
-#[test_case]
 fn encoding_base64() {
     let input = b"Hello, world!";
     let expected = "SGVsbG8sIHdvcmxkIQ";
@@ -124,3 +101,56 @@ fn decoding_base64() {
     let expected = "Hello, world!";
     assert_eq!(base64::decode(input), expected.to_string());
 }
+
+// BROKEN TESTS
+
+/*
+#[test_case]
+fn scanning_pci_bus() {
+    let res = pci::scan_pci_bus();
+    let mut exp: Vec<[u32; 4]> = Vec::new();
+    exp.push([32902, 4663, 6, 0]);
+    exp.push([32902, 28672, 6, 1]);
+    exp.push([32902, 28688, 1, 1]);
+    exp.push([32902, 28947, 6, 128]);
+    exp.push([4660, 4369, 3, 0]);
+    exp.push([32902, 4110, 2, 0]);
+
+    assert_eq!(exp, res);
+}
+*/
+
+/*
+#[test_case]
+fn test_rand_u16() {
+    match rand_u16() {
+        Ok(Some(val)) => {
+            assert!(val < u16::MAX, "(X_X)  rand_u16 value should be less than u16::MAX");
+        },
+        Ok(None) => panic!("(X_X)  rand_u16 should return Some value, not None"),
+        Err(e) => panic!("(X_X)  {}", e),
+    }
+}
+
+#[test_case]
+fn test_rand_u32() {
+    match rand_u32() {
+        Ok(Some(val)) => {
+            assert!(val < u32::MAX, "(X_X)  rand_u32 value should be less than u32::MAX");
+        },
+        Ok(None) => panic!("(X_X)  rand_u32 should return Some value, not None"),
+        Err(e) => panic!("(X_X)  {}", e),
+    }
+}
+
+#[test_case]
+fn test_rand_u64() {
+    match rand_u64() {
+        Ok(Some(val)) => {
+            assert!(val < u64::MAX, "(X_X)  rand_u64 value should be less than u64::MAX");
+        },
+        Ok(None) => panic!("(X_X)  rand_u64 should return Some value, not None"),
+        Err(e) => panic!("(X_X)  {}", e),
+    }
+}
+*/
