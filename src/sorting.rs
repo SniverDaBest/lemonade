@@ -27,16 +27,15 @@ fn partition<T: Ord>(arr: &mut [T], left: usize, right: usize) -> usize {
     i + 1
 }
 
-pub fn stupidsort<T: Ord + Copy>(arr: &mut [T]) {
-
-    let mut rng = Xorshift32::new(); // Initialize your Xorshift32 generator
+pub fn stupidsort<T: Ord + Copy>(arr: &mut [T], seed: u32) {
+    let mut rng = Xorshift32::new(seed); // Initialize your Xorshift32 generator
 
     loop {
         let mut permuted = false;
 
         for i in 0..arr.len() {
-            let j = rng.gen_range(i, arr.len()); // Generate a random index within the range
-            arr.swap(i, j); // Swap elements at positions i and j
+            let j = rng.gen_range(i as u32, arr.len() as u32); // Generate a random index within the range
+            arr.swap(i, j as usize); // Swap elements at positions i and j
 
             // Check if the array is sorted after every swap
             for k in 0..arr.len() - 1 {

@@ -29,7 +29,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use blog_os::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    println!("Lemonade 24m8");
+    println!("Lemonade 24m9");
     blog_os::init();
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);

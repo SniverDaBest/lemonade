@@ -4,12 +4,23 @@ use core::{
     mem,
     ptr::{self, NonNull},
 };
+use lazy_static::lazy_static;
+use core::sync::atomic::{AtomicBool, Ordering};
+use spin::Mutex;
+
+lazy_static! {
+    static ref ALLOCATOR: Mutex<FixedSizeBlockAllocator> = Mutex::new(FixedSizeBlockAllocator::new());
+}
+
+pub fn get_allocator_instance() -> &'static Mutex<FixedSizeBlockAllocator> {
+    &ALLOCATOR
+}
 
 /// The block sizes to use.
 ///
 /// The sizes must each be power of 2 because they are also used as
 /// the block alignment (alignments must be always powers of 2).
-const BLOCK_SIZES: &[usize] = &[8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+const BLOCK_SIZES: &[usize] = &[8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4098];
 
 /// Choose an appropriate block size for the given layout.
 ///

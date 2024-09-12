@@ -1,9 +1,8 @@
 use crate::{
-    pci,
-    println,
+    allocator::{fixed_size_block::{FixedSizeBlockAllocator, get_allocator_instance}, Locked}, pci, println
 };
 use alloc::vec::*;
-use core::fmt;
+use core::{alloc::Layout, fmt};
 
 pub struct AHCIController {
     pub pci_device: pci::PCIDevice,
@@ -13,6 +12,35 @@ pub struct AHCIController {
 pub struct AHCIDevice<'a> {
     pub port: u32,
     pub controller: &'a AHCIController,  // Reference to the AHCI controller this device belongs to
+}
+
+#[repr(C, packed)]
+struct HBACommandHeader {
+    // Command header fields
+    cfl: u8, // Command FIS length
+    a: u8,   // ATAPI flag
+    w: u8,   // Write flag
+    prdtl: u16, // Physical Region Descriptor Table length
+    prdbc: u32, // Physical Region Descriptor Byte Count
+    ctba: u32,  // Command Table Base Address
+    ctbau: u32, // Command Table Base Address Upper 32 bits
+    reserved: [u32; 4],
+}
+
+#[repr(C, packed)]
+struct HBACommandTable {
+    cfis: [u8; 64],    // Command FIS
+    acmd: [u8; 16],    // ATAPI command (if used)
+    reserved: [u8; 48],// Reserved area
+    prdt_entry: [HBA_PRDTEntry; 1], // PRDT entries
+}
+
+#[repr(C, packed)]
+struct HBA_PRDTEntry {
+    dba: u32,    // Data Base Address
+    dbau: u32,   // Upper 32 bits of address
+    reserved: u32,
+    dbc: u32,    // Byte count (interrupt upon completion)
 }
 
 impl<'a> AHCIDevice<'a> {
@@ -109,3 +137,40 @@ fn check_used_ports<'a>(controller: &'a AHCIController, num_ports: u32, verbose:
 
     res
 }
+/*
+fn ahci_read(controller: &AHCIController, port: &AHCIDevice, start_lba: u64, sector_count: u32, buffer: &mut [u8]) {
+    let port_base = controller.base_addr + port.port * 0x80;
+
+    // Get allocator instance
+    let mut allocator = get_allocator_instance().lock();
+
+    // Allocate memory
+    let command_list_layout = Layout::from_size_align(1024, 1024).unwrap();
+    let command_table_layout = Layout::from_size_align(4096, 4096).unwrap();
+    
+    let command_list = unsafe { allocator.allocate(command_list_layout.size()) };
+    let command_table = unsafe { allocator.allocate(command_table_layout.size()) };
+
+    // Set up command headers and tables as before...
+
+    // Issue the command
+    unsafe {
+        core::ptr::write_volatile((port_base + 0x38) as *mut u32, 1); // PxCI register
+    }
+
+    // Wait for command completion
+    while unsafe { core::ptr::read_volatile((port_base + 0x34) as *const u32) } & 1 == 1 {} // PxCI
+
+    // Check if the operation succeeded
+    let is = unsafe { core::ptr::read_volatile((port_base + 0x10) as *const u32) }; // PxIS
+    if is & 0x400 != 0 {
+        panic!("Read failed!");
+    }
+
+    // Deallocate memory
+    unsafe {
+        allocator.deallocate(command_list, command_list_layout.size());
+        allocator.deallocate(command_table, command_table_layout.size());
+    }
+}
+*/

@@ -10,7 +10,7 @@ I would be very grateful if people would contribute. However, I know that probab
 [![Builds](https://github.com/SniverDaBest/lemonade/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/SniverDaBest/lemonade/actions/workflows/rust.yml)
 
 Here are some notes for the users, about bugs, and other things that may happen.
-1. When running `cargo test`, it may fail on the `blog_os::scanning_pci_bus` part. That's because the way I'm actually dealing with it is really horrible.
+1. When running `cargo test`, it may fail on the `blog_os::scanning_pci_bus` part *(which is currently disabled...)*. That's because the way I'm actually dealing with it is really horrible.
 2. You may get flooded with dots when running. That happens to me, and I don't know how to fix it.
 3. When typing, it may repeat what you've typed. That's normal. *(well... it's normal in the, "yes this is supposed to happen" area. it is still a bug)*
-4. True randomness is borken for some reason.
+4. True randomness is broken for some reason.

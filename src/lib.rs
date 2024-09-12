@@ -21,6 +21,7 @@ pub mod base64;
 pub mod command_line;
 pub mod pci;
 pub mod disks;
+pub mod sorting;
 //pub mod clock; // no workie D:
 
 pub fn init() {
