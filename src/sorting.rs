@@ -13,18 +13,18 @@ fn quicksort_helper<T: Ord>(arr: &mut [T], left: usize, right: usize) {
 }
 
 fn partition<T: Ord>(arr: &mut [T], left: usize, right: usize) -> usize {
-    let pivot = arr[right];
-    let mut i = left - 1;
+    let pivot_index = right;  // Use the last element as the pivot
+    let mut i = left;
 
     for j in left..right {
-        if arr[j] <= pivot {
-            i += 1;
+        if arr[j] <= arr[pivot_index] {
             arr.swap(i, j);
+            i += 1;
         }
     }
 
-    arr.swap(i + 1, right);
-    i + 1
+    arr.swap(i, pivot_index);  // Swap pivot to its correct position
+    i  // Return the pivot index
 }
 
 pub fn stupidsort<T: Ord + Copy>(arr: &mut [T], seed: u32) {
