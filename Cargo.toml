@@ -49,9 +49,6 @@ features = ["alloc"]
 test-args = [
     "-device",
     "isa-debug-exit,iobase=0xf4,iosize=0x04",
-    "-drive id=disk,file=disk.img,if=none",
-    "-device ahci,id=ahci",
-    "-device ide-hd,drive=disk,bus=ahci.0",
     "-serial",
     "stdio",
     "-display",
