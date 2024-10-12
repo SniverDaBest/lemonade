@@ -1,19 +1,11 @@
 use crate::{
-    task::keyboard,
-    print,
-    println,
-    vga_buffer::WRITER,
-    base64,
-    randomness,
-    pci,
-    disks,
+    base64, disks::ahci::{self, scan_for_used_ports, AHCIController, AHCIDevice}, pci::{self, PCIDevice}, print, println, randomness, task::keyboard, vga_buffer::WRITER
 };
-use core::{mem::drop,future::Future};
 use alloc::{string::{String, ToString}, vec::Vec};
 use futures_util::stream::StreamExt;
 use pc_keyboard::{DecodedKey, Keyboard, ScancodeSet1};
 
-static SHSH_VERSION: &str = "b0.2";
+static SHSH_VERSION: &str = "b0.3";
 
 pub async fn run_command_line() {
     println!("Made by SniverDaBest\nSHSH {}", SHSH_VERSION);
@@ -60,10 +52,7 @@ pub async fn run_command_line() {
 }
 
 fn redraw_input_buffer(input_buffer: &str) {
-    // Move the cursor to the start of the line
-    print!("\r");
-    // Print the prompt and the current input buffer
-    print!("{}", input_buffer);
+    print!("\r{}", input_buffer);
 }
 
 fn process_command(command: &str) {
@@ -205,8 +194,28 @@ fn process_command(command: &str) {
             println!("AHCI Utility");
             println!("-h -- Shows this help message.");
             println!("-l -- Lists connected AHCI devices.");
+            println!("-r -- Reads sectors from an AHCI device.");
+            println!("-t -- Tests a little thing.");
         } else if command.trim().contains("-l") {
-            disks::ahci::scan_for_ahci_controllers(true);
+            ahci::scan_for_ahci_controllers(true);
+        } else if command.contains("-r") {
+            todo!();
+        } else if command.contains("-t") {
+            let ahci_controllers = ahci::scan_for_ahci_controllers(false);
+            if ahci_controllers.is_empty() {
+                println!("No AHCI Controllers found.");
+                return;
+            }
+            let ahci_devices = scan_for_used_ports(&ahci_controllers[0], false);
+            if ahci_devices.is_empty() {
+                println!("No AHCI Devices found.");
+                return;
+            }
+
+            let mut sectors: Vec<u64> = Vec::new();
+            sectors.push(0);
+            
+            ahci::ahci_read(&ahci_devices[0], sectors);
         }
     } else if command.trim().contains("help") {
         println!("SHSH Version {}.", SHSH_VERSION);

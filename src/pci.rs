@@ -35,6 +35,23 @@ impl fmt::Display for PCIDevice {
     }
 }
 
+/// Writes to a certain PCI device, at a certain offset.
+pub fn write_pci(offset: u8, pci_device: &PCIDevice, value: u32) {
+    let address = (1 << 31) 
+        | ((pci_device.bus as u32) << 16) 
+        | ((pci_device.slot as u32) << 11)  // Slot should be correct
+        | ((pci_device.func as u32) << 8) 
+        | ((offset as u32) & 0xFC);
+
+    unsafe {
+        // Write to PCI address port
+        core::arch::asm!("out dx, eax", in("dx") 0xCF8, in("eax") address);
+
+        // Write to PCI data port
+        core::arch::asm!("out dx, eax", in("dx") 0xCFC, in("eax") value);
+    }
+}
+
 /// Reads from a certain PCI device, at a certain offset.
 pub fn read_pci(offset: u8, pci_device: &PCIDevice) -> u32 {
     let address = (1 << 31) 
@@ -53,7 +70,6 @@ pub fn read_pci(offset: u8, pci_device: &PCIDevice) -> u32 {
         data
     }
 }
-
 
 /// Reads from the PCI config space via the IO ports.
 pub unsafe fn read_pci_config(bus: u8, slot: u8, func: u8, offset: u8) -> u32 {

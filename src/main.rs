@@ -7,20 +7,17 @@
 extern crate alloc;
 
 use lemonade::{
-    task::{
+    base64, command_line::run_command_line, pci, println, randomness::*, sorting::quicksort, task::{
         executor::Executor,
         keyboard,
         Task
-    },
-    randomness::*, 
-    command_line::run_command_line,
-    base64,
-    println,
-    pci,
+    }
 };
+use alloc::borrow::ToOwned;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use alloc::{string::{String, ToString}, vec::Vec};
+use core::sync::atomic::{AtomicUsize, Ordering};
 
 entry_point!(kernel_main);
 
@@ -29,7 +26,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use lemonade::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    println!("Lemonade 24m9");
+    println!("Lemonade 24m10");
     lemonade::init();
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
@@ -102,55 +99,21 @@ fn decoding_base64() {
     assert_eq!(base64::decode(input), expected.to_string());
 }
 
-// BROKEN TESTS
-
-/*
 #[test_case]
-fn scanning_pci_bus() {
-    let res = pci::scan_pci_bus();
-    let mut exp: Vec<[u32; 4]> = Vec::new();
-    exp.push([32902, 4663, 6, 0]);
-    exp.push([32902, 28672, 6, 1]);
-    exp.push([32902, 28688, 1, 1]);
-    exp.push([32902, 28947, 6, 128]);
-    exp.push([4660, 4369, 3, 0]);
-    exp.push([32902, 4110, 2, 0]);
+fn string_concatenation() {
+    let string1 = "Hello";
+    let string2 = "World";
+    let result = string1.to_owned()+string2;
 
-    assert_eq!(exp, res);
-}
-*/
-
-/*
-#[test_case]
-fn test_rand_u16() {
-    match rand_u16() {
-        Ok(Some(val)) => {
-            assert!(val < u16::MAX, "(X_X)  rand_u16 value should be less than u16::MAX");
-        },
-        Ok(None) => panic!("(X_X)  rand_u16 should return Some value, not None"),
-        Err(e) => panic!("(X_X)  {}", e),
-    }
+    assert_eq!(result, "HelloWorld".to_string());
 }
 
 #[test_case]
-fn test_rand_u32() {
-    match rand_u32() {
-        Ok(Some(val)) => {
-            assert!(val < u32::MAX, "(X_X)  rand_u32 value should be less than u32::MAX");
-        },
-        Ok(None) => panic!("(X_X)  rand_u32 should return Some value, not None"),
-        Err(e) => panic!("(X_X)  {}", e),
-    }
+fn str_equals_str() {
+    assert_eq!("this is an &str", "this is an &str");
 }
 
 #[test_case]
-fn test_rand_u64() {
-    match rand_u64() {
-        Ok(Some(val)) => {
-            assert!(val < u64::MAX, "(X_X)  rand_u64 value should be less than u64::MAX");
-        },
-        Ok(None) => panic!("(X_X)  rand_u64 should return Some value, not None"),
-        Err(e) => panic!("(X_X)  {}", e),
-    }
+fn str_doesnt_equals_str() {
+    assert_ne!("this is an &str.", "this is an &str!");
 }
-*/

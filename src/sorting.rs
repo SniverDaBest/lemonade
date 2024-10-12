@@ -1,10 +1,11 @@
 use crate::randomness::Xorshift32;
+use alloc::vec::*;
 
-pub fn quicksort<T: Ord>(arr: &mut [T]) {
+pub fn quicksort<T: Ord>(arr: &mut Vec<T>) {
     quicksort_helper(arr, 0, arr.len());
 }
 
-fn quicksort_helper<T: Ord>(arr: &mut [T], left: usize, right: usize) {
+fn quicksort_helper<T: Ord>(arr: &mut Vec<T>, left: usize, right: usize) {
     if left < right {
         let pivot_index = partition(arr, left, right);
         quicksort_helper(arr, left, pivot_index);
