@@ -50,7 +50,6 @@ impl<'a> AHCIDevice<'a> {
 }
 
 impl AHCIController {
-
     pub fn new(pci_device: pci::PCIDevice, base_addr: u32) -> AHCIController {
         AHCIController { pci_device, base_addr }
     }
@@ -129,7 +128,80 @@ impl AHCIController {
         }
 
         buffer
-    }
+    }  
+    pub fn write(&self, device: &AHCIDevice, sector: u64, count: u16, data: &[u8]) -> bool {
+        // Step 1: Set up command list and FIS structures
+        let port = device.port as u32;
+        let clb = self.base_addr + (port * 0x80);  // Command List Base Address
+        let fb = clb + 0x40;  // FIS Base Address
+    
+        // Allocate a command header, table, and PRDT entry
+        let cmd_header = HBACommandHeader {
+            cfl: 5,  // FIS length = 5 DWORDs for a write command
+            a: 0,
+            w: 1,  // Write operation
+            prdtl: 1,  // One PRDT entry for simplicity
+            prdbc: 0,
+            ctba: fb + 0x80,
+            ctbau: 0,
+            reserved: [0; 4],
+        };
+    
+        let prdt_entry = HBA_PRDTEntry {
+            dba: fb,  // Buffer address
+            dbau: 0,
+            reserved: 0,
+            dbc: (512 * count as u32) - 1,  // 512 bytes per sector
+        };
+    
+        let mut cmd_table = HBACommandTable {
+            cfis: [0; 64],
+            acmd: [0; 16],
+            reserved: [0; 48],
+            prdt_entry: [prdt_entry],
+        };
+    
+        // Step 2: Set up the command FIS (First Information Structure)
+        // The FIS will contain the ATA WRITE SECTORS command
+        cmd_table.cfis[0] = 0x27;  // FIS type: RegH2D (Host to Device)
+        cmd_table.cfis[1] = 1 << 7;  // Command, not control
+        cmd_table.cfis[2] = 0x35;  // Command: WRITE DMA EXT
+    
+        // Set the starting LBA (Logical Block Address)
+        cmd_table.cfis[4] = (sector & 0xFF) as u8;
+        cmd_table.cfis[5] = ((sector >> 8) & 0xFF) as u8;
+        cmd_table.cfis[6] = ((sector >> 16) & 0xFF) as u8;
+        cmd_table.cfis[7] = ((sector >> 24) & 0xFF) as u8;
+        cmd_table.cfis[8] = ((sector >> 32) & 0xFF) as u8;
+        cmd_table.cfis[9] = ((sector >> 40) & 0xFF) as u8;
+    
+        // Set the sector count
+        cmd_table.cfis[12] = (count & 0xFF) as u8;
+        cmd_table.cfis[13] = ((count >> 8) & 0xFF) as u8;
+    
+        // Step 3: Copy data to buffer
+        unsafe {
+            let data_ptr = data.as_ptr();
+            let buf_ptr = fb as *mut u8;
+            core::ptr::copy_nonoverlapping(data_ptr, buf_ptr, data.len());
+        }
+    
+        // Step 4: Issue the command
+        unsafe {
+            let port_cmd = (self.base_addr + 0x118 + (port * 0x80)) as *mut u32;
+            *port_cmd |= 1 << 0;  // Start the command
+        }
+    
+        // Step 5: Wait for completion
+        loop {
+            let port_tfd = unsafe { core::ptr::read_volatile((self.base_addr + 0x120 + (port * 0x80)) as *const u32) };
+            if port_tfd & (1 << 7) == 0 {
+                break;  // Wait until busy bit is cleared
+            }
+        }
+    
+        true // Return success
+    }    
 }
 
 impl fmt::Display for AHCIController {
@@ -216,4 +288,11 @@ pub fn ahci_read(device: &AHCIDevice, sectors: Vec<u64>) -> Vec<u8> {
     }
 
     return res;
+}
+
+pub fn ahci_write(device: &AHCIDevice, sectors: Vec<u64>, data: &[u8]) { 
+    let controller = device.controller;
+    for sector in sectors {
+        controller.write(device, sector, 1, data);
+    }
 }

@@ -1,10 +1,9 @@
 # Highest Priority
 - Filesystem Access
-- AHCI
 - Fix the dots
 
 # Medium Priority
-- Work on SHSH
+- Fix AHCI Reading and Writing
 - Add a GUI
     - Libs for external programs to interface with
     - Mouse support
@@ -14,3 +13,4 @@
 # Low Priority
 - Implement true randomness, instead of a Xorshift.
 - Networking (not looking forward to this...)
+- Work on SHSH

@@ -215,7 +215,7 @@ fn process_command(command: &str) {
             let mut sectors: Vec<u64> = Vec::new();
             sectors.push(0);
             
-            ahci::ahci_read(&ahci_devices[0], sectors);
+            ahci::ahci_write(&ahci_devices[0], sectors, &[1 as u8,5 as u8,3 as u8]);
         }
     } else if command.trim().contains("help") {
         println!("SHSH Version {}.", SHSH_VERSION);
