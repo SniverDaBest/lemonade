@@ -48,7 +48,11 @@ features = ["alloc"]
 [package.metadata.bootimage]
 test-args = [
     "-device",
+<<<<<<< Updated upstream
     "isa-debug-exit,iobase=0xf4,iosize=0x04",
+=======
+    "isa-debug-exit,iobase=0xf4,iosize=0x04", 
+>>>>>>> Stashed changes
     "-serial",
     "stdio",
     "-display",
