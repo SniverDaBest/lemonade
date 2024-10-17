@@ -40,6 +40,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     let mut executor = Executor::new();
     executor.spawn(Task::new(run_command_line()));
+    executor.spawn(Task::new(testicle()));
     executor.run();
 }
 
@@ -56,6 +57,10 @@ fn panic(info: &PanicInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     lemonade::test_panic_handler(info)
+}
+
+async fn testicle() {
+    while 1 { test_graphics(); }
 }
 
 #[test_case]

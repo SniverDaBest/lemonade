@@ -1,6 +1,7 @@
 # Highest Priority
 - Filesystem Access
 - Fix the dots
+- Use `GRUB` over the `bootloader` crate.
 
 # Medium Priority
 - Fix AHCI Reading and Writing
