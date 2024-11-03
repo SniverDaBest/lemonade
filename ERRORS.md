@@ -14,7 +14,7 @@ Lemonade doesn't really have cryptic error codes, but just the errors thrown by 
 Uh-oh! Lemonade panicked. Here's some info: panicked at src/[some_file]:[some_line]:[some_col]:
 EXCEPTION: [some exception]
 [insert details here...]
-```
+``` 
 ## Errors you may get
 ### Unable to initialize PICS
 ```
@@ -35,4 +35,4 @@ InterruptStackFrame {
 }
 ```
 
-This error happens when the system is unable to initialize the PICS. Causes are unknown for this to happen naturally. However, this can be caused by deleting/commenting out line `30` of src/lib.rs.
+This error happens when the system is unable to initialize the PICS. Causes are unknown for this to happen naturally. However, by commenting out a line in `lib.rs`, it is possible to manually trigger it.

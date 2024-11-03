@@ -11,7 +11,7 @@ use lemonade::{
         executor::Executor,
         keyboard,
         Task
-    }
+    }, graphics::*,
 };
 use alloc::borrow::ToOwned;
 use bootloader::{entry_point, BootInfo};
@@ -26,7 +26,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use lemonade::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    println!("Lemonade 24m10");
+    println!("Lemonade 24m11");
     lemonade::init();
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);

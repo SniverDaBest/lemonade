@@ -23,6 +23,7 @@ pub mod pci;
 pub mod disks;
 pub mod sorting;
 pub mod graphics;
+pub mod fs;
 //pub mod clock; // no workie D:
 
 pub fn init() {
