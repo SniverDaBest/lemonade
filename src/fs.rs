@@ -1,5 +1,3 @@
-#![allow(arithmetic_overflow)]
-
 use alloc::{
     string::*,
     vec,
@@ -9,13 +7,13 @@ use alloc::{
 /// The header of the filesystem.
 pub struct FSHeader {
     /// Filesystem version.
-    pub version: u8,
+    pub version: u32,
     /// Name of partion filesystem is on.
     pub part_name: String,
 }
 
 impl FSHeader {
-    pub fn new(version: u8, part_name: String) -> Self { return Self {version, part_name}; }
+    pub fn new(version: u32, part_name: String) -> Self { return Self {version, part_name}; }
 }
 
 /// A node of the filesystem.
@@ -36,10 +34,10 @@ impl FSNode {
 
 /// Writes to a filesystem header.
 pub fn write_fs_header(result: &mut Vec<u8>, header: &mut FSHeader) {
-    result[0] = header.version >> 24 & 0xff;
-    result[1] = header.version >> 16 & 0xff;
-    result[2] = header.version >> 8 & 0xff;
-    result[3] = header.version & 0xff;
+    result[0] = (header.version >> 24) as u8;
+    result[1] = (header.version >> 16) as u8;
+    result[2] = (header.version >> 8) as u8;
+    result[3] = header.version as u8;
     for i in 0..32 { result[4+i] = header.part_name.as_bytes()[i]; }
 }
 
@@ -61,7 +59,7 @@ pub fn write_fs_node(result: &mut Vec<u8>, node: &mut FSNode) {
 /// Serializes an FSHeader into a byte vec.
 pub fn serialize_fs_header(header: &FSHeader) -> Vec<u8> {
     let mut result: Vec<u8> = vec![0; 36];
-    result[0] = header.version;
+    result[0] = header.version as u8;
     let name_bytes = header.part_name.as_bytes();
     result[4..4 + name_bytes.len()].copy_from_slice(name_bytes);
     return result;
