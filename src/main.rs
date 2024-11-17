@@ -7,17 +7,37 @@
 extern crate alloc;
 
 use lemonade::{
-    base64, command_line::run_command_line, pci, println, randomness::*, sorting::quicksort, task::{
+    base64,
+    command_line::run_command_line,
+    pci,
+    println,
+    randomness::*,
+    sorting::quicksort,
+    task::{
         executor::Executor,
         keyboard,
         Task
-    }, graphics::*,
+    },
+    graphics::*,
+    disks::ahci::{*,self},
 };
 use alloc::borrow::ToOwned;
-use bootloader::{entry_point, BootInfo};
+use bootloader::{
+    entry_point,
+    BootInfo
+};
 use core::panic::PanicInfo;
-use alloc::{string::{String, ToString}, vec::Vec};
-use core::sync::atomic::{AtomicUsize, Ordering};
+use alloc::{
+    string::{
+	String,
+	ToString
+    },
+    vec::Vec
+};
+use core::sync::atomic::{
+    AtomicUsize,
+    Ordering
+};
 
 entry_point!(kernel_main);
 
@@ -75,9 +95,9 @@ fn basic_math() {
 
 #[test_case]
 fn string_modification() {
-    let mut str = "sample string #1";
-    str = "sample string #2";
-    assert_eq!(str, "sample string #2");
+    let mut s = "sample string #1";
+    s = "sample string #2";
+    assert_eq!(s, "sample string #2");
 }
 
 #[test_case]
@@ -116,4 +136,32 @@ fn str_equals_str() {
 #[test_case]
 fn str_doesnt_equals_str() {
     assert_ne!("this is an &str.", "this is an &str!");
+}
+
+#[test_case]
+fn test_ahci() {
+    let controllers: Vec<ahci::AHCIController> = ahci::scan_for_ahci_controllers(false);
+    let count = controllers.len();
+
+    let mut controllers_found: bool = false;
+    if count > 0 {
+	    controllers_found = true;
+    }
+
+    assert!(controllers_found, "Controllers were NOT found! Did you possibly forget to add the drive in the Qemu testing args?");
+
+    let mut used_ports: Vec<ahci::AHCIDevice> = Vec::new();
+    for controller in controllers.iter() {
+        let ports = scan_for_used_ports(&controller, false);
+        for port in ports {
+            used_ports.push(port);
+        }
+    }
+
+    let mut used_ports_found: bool = false;
+    if used_ports.len() > 0 {
+        used_ports_found = true;
+    }
+
+    assert!(used_ports_found, "Could NOT find any used AHCI ports!");
 }
