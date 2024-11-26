@@ -134,7 +134,7 @@ fn str_equals_str() {
 }
 
 #[test_case]
-fn str_doesnt_equals_str() {
+fn str_doesnt_equal_str() {
     assert_ne!("this is an &str.", "this is an &str!");
 }
 
