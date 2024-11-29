@@ -1,10 +1,5 @@
-use core::{
-    arch::asm,
-    ptr,
-    slice::from_raw_parts,
-    fmt,
-};
 use alloc::vec::*;
+use core::{arch::asm, fmt, ptr, slice::from_raw_parts};
 
 /// The PCI Device type.
 pub struct PCIDevice {
@@ -20,8 +15,24 @@ pub struct PCIDevice {
 
 impl PCIDevice {
     /// Creates a new PCI Device type.
-    pub fn new(vendor_id: u32, device_id: u32, class_code: u32, subclass: u32, bus: u8, slot: u8, func: u8) -> PCIDevice {
-        return PCIDevice { vendor_id: vendor_id, device_id: device_id, class_code: class_code, subclass: subclass, bus: bus, slot: slot, func: func };
+    pub fn new(
+        vendor_id: u32,
+        device_id: u32,
+        class_code: u32,
+        subclass: u32,
+        bus: u8,
+        slot: u8,
+        func: u8,
+    ) -> PCIDevice {
+        return PCIDevice {
+            vendor_id: vendor_id,
+            device_id: device_id,
+            class_code: class_code,
+            subclass: subclass,
+            bus: bus,
+            slot: slot,
+            func: func,
+        };
     }
 }
 
@@ -38,9 +49,9 @@ impl fmt::Display for PCIDevice {
 /// Writes to a certain PCI device, at a certain offset.
 pub fn write_pci(offset: u8, pci_device: &PCIDevice, value: u32) {
     let address = (1 << 31) 
-        | ((pci_device.bus as u32) << 16) 
+        | ((pci_device.bus as u32) << 16)
         | ((pci_device.slot as u32) << 11)  // Slot should be correct
-        | ((pci_device.func as u32) << 8) 
+        | ((pci_device.func as u32) << 8)
         | ((offset as u32) & 0xFC);
 
     unsafe {
@@ -73,7 +84,11 @@ pub fn read_pci(offset: u8, pci_device: &PCIDevice) -> u32 {
 
 /// Reads from the PCI config space via the IO ports.
 pub unsafe fn read_pci_config(bus: u8, slot: u8, func: u8, offset: u8) -> u32 {
-    let addr = (1 << 31) | ((bus as u32) << 16) | ((slot as u32) << 11) | ((func as u32) << 8) | ((offset as u32) & 0xFC);
+    let addr = (1 << 31)
+        | ((bus as u32) << 16)
+        | ((slot as u32) << 11)
+        | ((func as u32) << 8)
+        | ((offset as u32) & 0xFC);
     asm!("out dx, eax", in("dx") 0xCF8, in("eax") addr);
     let value: u32;
     asm!("in eax, dx", out("eax") value, in("dx") 0xCFC);
@@ -82,7 +97,11 @@ pub unsafe fn read_pci_config(bus: u8, slot: u8, func: u8, offset: u8) -> u32 {
 
 /// Writes to the PCI config space via the IO ports.
 pub unsafe fn write_pci_config(bus: u8, slot: u8, func: u8, offset: u8, value: u32) {
-    let address = (1 << 31) | ((bus as u32) << 16) | ((slot as u32) << 11) | ((func as u32) << 8) | ((offset as u32) & 0xFC);
+    let address = (1 << 31)
+        | ((bus as u32) << 16)
+        | ((slot as u32) << 11)
+        | ((func as u32) << 8)
+        | ((offset as u32) & 0xFC);
     asm!("out dx, eax", in("dx") 0xCF8, in("eax") address);
     asm!("out dx, eax", in("dx") 0xCFC, in("eax") value);
 }
@@ -97,9 +116,11 @@ pub fn scan_pci_bus() -> Vec<PCIDevice> {
                 if vendor_id != 0xFFFF {
                     let device_id = unsafe { read_pci_config(bus, slot, func, 0x00) >> 16 };
                     let class_code = unsafe { read_pci_config(bus, slot, func, 0x08) >> 24 };
-                    let subclass = (unsafe { read_pci_config(bus, slot, func, 0x08) } >> 16 ) & 0xFF;
+                    let subclass = (unsafe { read_pci_config(bus, slot, func, 0x08) } >> 16) & 0xFF;
 
-                    devices.push(PCIDevice::new(vendor_id, device_id, class_code, subclass, bus, slot, func));
+                    devices.push(PCIDevice::new(
+                        vendor_id, device_id, class_code, subclass, bus, slot, func,
+                    ));
                 }
             }
         }
@@ -174,19 +195,19 @@ fn get_rsdp() -> [u8; 1024] {
 
     if found == false {
         let mut addr = 0x000E0000;
-    
+
         while addr <= 0x000FFFFF - rsd_ptr_.as_bytes().len() {
             unsafe {
                 // Create a pointer to the current memory address
                 let ptr = addr as *const u8;
-    
+
                 // Check if the memory at this address matches the target string
                 if from_raw_parts(ptr, rsd_ptr_.as_bytes().len()) == rsd_ptr_.as_bytes() {
                     found = true;
                     res_loc = addr;
                 }
             }
-    
+
             addr += 1;
         }
     }
@@ -215,7 +236,7 @@ pub unsafe fn pcie_read(bus: u8, device: u8, function: u8, offset: u16) -> u32 {
 }
 
 /// Example PCIe configuration space read function
-/// 
+///
 /// Returns in format [vendor_id, device_id, class_code, subclass]
 pub fn scan_pcie_bus() -> Vec<[u32; 4]> {
     let mut res_loc: Vec<[u32; 4]> = Vec::new();

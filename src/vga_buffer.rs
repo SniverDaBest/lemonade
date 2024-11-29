@@ -1,4 +1,6 @@
-use core::fmt;
+#![feature(fmt_internals)]
+
+use core::fmt::{self, Debug};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
@@ -179,6 +181,31 @@ macro_rules! print {
 macro_rules! println {
     () => ($crate::print!("\n"));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! eprint {
+    ($($arg:tt)*) => {{
+        $crate::io::_eprint($crate::format_args!($($arg)*));
+    }};
+}
+
+#[macro_export]
+macro_rules! eprintln {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub fn _dbg<T: fmt::Debug>(args: T) {
+    println!("{:#?}", args);
+}
+
+#[macro_export]
+macro_rules! dbg {
+    ($args:expr) => {{
+        $crate::vga_buffer::_dbg($args);
+    }};
 }
 
 /// Prints the given formatted string to the VGA text buffer

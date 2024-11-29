@@ -1,7 +1,7 @@
 [package]
 name = "lemonade"
 version = "24.11.0"
-authors = ["SniverDaBest <sniver@sniver.serv00.com>"]
+authors = ["SniverDaBest <sniverdabest@proton.me>"]
 edition = "2018"
 
 [[test]]
@@ -12,6 +12,9 @@ harness = false
 name = "stack_overflow"
 harness = false
 
+[build-dependencies]
+cc = "1.2.1"
+
 [dependencies]
 bootloader = { version="0.9", features=["map_physical_memory"] }
 volatile = "0.2.6"
@@ -21,6 +24,7 @@ uart_16550 = "0.2.0"
 pic8259 = "0.10.1"
 pc-keyboard = "0.8.0"
 linked_list_allocator = "0.10.2"
+vcell = "0.1.3"
 
 [dependencies.lazy_static]
 version = "1.0"

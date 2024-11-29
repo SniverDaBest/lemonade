@@ -1,8 +1,4 @@
-use alloc::{
-    string::*,
-    vec,
-    vec::*,
-};
+use alloc::{string::*, vec, vec::*};
 
 /// The header of the filesystem.
 pub struct FSHeader {
@@ -13,7 +9,9 @@ pub struct FSHeader {
 }
 
 impl FSHeader {
-    pub fn new(version: u32, part_name: String) -> Self { return Self {version, part_name}; }
+    pub fn new(version: u32, part_name: String) -> Self {
+        return Self { version, part_name };
+    }
 }
 
 /// A node of the filesystem.
@@ -29,7 +27,14 @@ pub struct FSNode {
 }
 
 impl FSNode {
-    pub fn new(name: String, node_type: u8, file_len: u128, next_byte: u8) -> Self { return Self {name, node_type, file_len, next_byte}; }
+    pub fn new(name: String, node_type: u8, file_len: u128, next_byte: u8) -> Self {
+        return Self {
+            name,
+            node_type,
+            file_len,
+            next_byte,
+        };
+    }
 }
 
 /// Writes to a filesystem header.
@@ -38,12 +43,16 @@ pub fn write_fs_header(result: &mut Vec<u8>, header: &mut FSHeader) {
     result[1] = (header.version >> 16) as u8;
     result[2] = (header.version >> 8) as u8;
     result[3] = header.version as u8;
-    for i in 0..32 { result[4+i] = header.part_name.as_bytes()[i]; }
+    for i in 0..32 {
+        result[4 + i] = header.part_name.as_bytes()[i];
+    }
 }
 
 /// Writes to a filesystem node.
 pub fn write_fs_node(result: &mut Vec<u8>, node: &mut FSNode) {
-    for i in 0..255 { result[i] = node.name.as_bytes()[i] }
+    for i in 0..255 {
+        result[i] = node.name.as_bytes()[i]
+    }
     result[256] = node.node_type;
     result[257] = (node.file_len >> 56) as u8;
     result[258] = (node.file_len >> 48) as u8;

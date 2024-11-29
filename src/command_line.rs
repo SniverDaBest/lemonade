@@ -1,11 +1,15 @@
 use crate::{
-    base64, disks::ahci::{self, scan_for_used_ports, AHCIController, AHCIDevice}, pci::{self, PCIDevice}, print, println, randomness, task::keyboard, vga_buffer::WRITER
+    base64, cmos::*, dbg, disks::ahci::*, pci, print, println, randomness, task::keyboard,
+    vga_buffer::WRITER,
 };
-use alloc::{string::{String, ToString}, vec::Vec};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use futures_util::stream::StreamExt;
 use pc_keyboard::{DecodedKey, Keyboard, ScancodeSet1};
 
-static SHSH_VERSION: &str = "b0.3";
+static SHSH_VERSION: &str = "b0.4";
 
 pub async fn run_command_line() {
     println!("Made by SniverDaBest\nSHSH {}", SHSH_VERSION);
@@ -29,30 +33,28 @@ pub async fn run_command_line() {
                     match key {
                         DecodedKey::Unicode(character) => {
                             if character == '\n' {
+                                print!("\n");
                                 // Process command
                                 process_command(&input_buffer);
                                 input_buffer.clear();
                                 prompt = "$ ".to_string();
                                 // Move to the next line and show the new prompt
+
                                 print!("\n{}", prompt);
                             } else {
                                 input_buffer.push(character);
                                 // Redraw input buffer
-                                redraw_input_buffer(&input_buffer);
+                                print!("{}", character);
                             }
-                        },
+                        }
                         DecodedKey::RawKey(_) => {
-                            // Handle special keys if needed
+                            // impl if needed
                         }
                     }
                 }
             }
         }
     }
-}
-
-fn redraw_input_buffer(input_buffer: &str) {
-    print!("\r{}", input_buffer);
 }
 
 fn process_command(command: &str) {
@@ -85,8 +87,12 @@ fn process_command(command: &str) {
                 println!("-h/--help -- Shows this message.");
                 println!("-d/--device -- Only shows devices with provided device ID.");
                 println!("-v/--vendor -- Only shows devices with provided vendor ID.");
-                println!("-c/--class -- Only shows devices with provided class code. -- UNIMPLEMENTED!!");
-                println!("-s/--sub -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!");
+                println!(
+                    "-c/--class -- Only shows devices with provided class code. -- UNIMPLEMENTED!!"
+                );
+                println!(
+                    "-s/--sub -- Only shows devices with provided subclass. -- UNIMPLEMENTED!!"
+                );
                 println!("-le/--list-pcie -- Lists PCIe devices. -- UNIMPLEMENTED!!");
                 println!("-de/--device-pcie -- Only shows PCIe devices with provided device ID.");
                 println!("-ve/--vendor-pcie -- Only shows PCIe devices with provided vendor ID.");
@@ -96,7 +102,9 @@ fn process_command(command: &str) {
                 break;
             } else if arg == "-l" || arg == "--list" {
                 let bus = pci::scan_pci_bus();
-                for x in bus { println!("{}", x); }
+                for x in bus {
+                    println!("{}", x);
+                }
             } else if arg == "-d" || arg == "--device" {
                 let mut t = 0;
                 for a in command.split_whitespace() {
@@ -108,7 +116,14 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pci_bus();
                 for x in bus {
-                    if x.device_id == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                    if x.device_id
+                        == command
+                            .split_whitespace()
+                            .nth(t)
+                            .unwrap()
+                            .parse::<u32>()
+                            .unwrap()
+                    {
                         println!("{}", x);
                     }
                 }
@@ -123,7 +138,14 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pci_bus();
                 for x in bus {
-                    if x.vendor_id == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                    if x.vendor_id
+                        == command
+                            .split_whitespace()
+                            .nth(t)
+                            .unwrap()
+                            .parse::<u32>()
+                            .unwrap()
+                    {
                         println!("{}", x);
                     }
                 }
@@ -138,7 +160,14 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pci_bus();
                 for x in bus {
-                    if x.class_code == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                    if x.class_code
+                        == command
+                            .split_whitespace()
+                            .nth(t)
+                            .unwrap()
+                            .parse::<u32>()
+                            .unwrap()
+                    {
                         println!("{}", x);
                     }
                 }
@@ -153,7 +182,14 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pci_bus();
                 for x in bus {
-                    if x.subclass == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
+                    if x.subclass
+                        == command
+                            .split_whitespace()
+                            .nth(t)
+                            .unwrap()
+                            .parse::<u32>()
+                            .unwrap()
+                    {
                         println!("{}", x);
                     }
                 }
@@ -168,8 +204,18 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pcie_bus();
                 for x in bus {
-                    if x[1] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
-                        println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
+                    if x[1]
+                        == command
+                            .split_whitespace()
+                            .nth(t)
+                            .unwrap()
+                            .parse::<u32>()
+                            .unwrap()
+                    {
+                        println!(
+                            "Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'",
+                            x[1], x[0], x[2], x[3]
+                        );
                     }
                 }
             } else if arg == "-ve" || arg == "--vendor-pcie" {
@@ -183,8 +229,18 @@ fn process_command(command: &str) {
                 }
                 let bus = pci::scan_pcie_bus();
                 for x in bus {
-                    if x[0] == command.split_whitespace().nth(t).unwrap().parse::<u32>().unwrap() {
-                        println!("Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'", x[1], x[0], x[2], x[3]);
+                    if x[0]
+                        == command
+                            .split_whitespace()
+                            .nth(t)
+                            .unwrap()
+                            .parse::<u32>()
+                            .unwrap()
+                    {
+                        println!(
+                            "Device ID '{}' | Vendor ID '{}' | Class Code '{}' | Subclass '{}'",
+                            x[1], x[0], x[2], x[3]
+                        );
                     }
                 }
             }
@@ -197,11 +253,11 @@ fn process_command(command: &str) {
             println!("-r -- Reads sectors from an AHCI device.");
             println!("-t -- Tests a little thing.");
         } else if command.trim().contains("-l") {
-            ahci::scan_for_ahci_controllers(true);
+            scan_for_ahci_controllers(true);
         } else if command.contains("-r") {
             todo!();
         } else if command.contains("-t") {
-            let ahci_controllers = ahci::scan_for_ahci_controllers(false);
+            let ahci_controllers = scan_for_ahci_controllers(false);
             if ahci_controllers.is_empty() {
                 println!("No AHCI Controllers found.");
                 return;
@@ -214,20 +270,29 @@ fn process_command(command: &str) {
 
             let mut sectors: Vec<u64> = Vec::new();
             sectors.push(0);
-            
-            ahci::ahci_write(&ahci_devices[0], sectors, &[1 as u8,5 as u8,3 as u8]);
+
+            ahci_write(&ahci_devices[0], sectors, &[1 as u8, 5 as u8, 3 as u8]);
         }
+    } else if command.trim().contains("time") {
+        let time = Time::from_current();
+        println!("Current time is: {}", time);
     } else if command.trim().contains("help") {
         println!("SHSH Version {}.", SHSH_VERSION);
         println!("help -- Shows this message.");
         println!("echo [input] -- Echos user input.");
         println!("clear -- Clears the screen.");
-        println!("ver -- Shows the version of SHSH. (currently running version {})", SHSH_VERSION);
+        println!(
+            "ver -- Shows the version of SHSH. (currently running version {})",
+            SHSH_VERSION
+        );
         println!("b64encode [input] -- Encodes user input into Base64");
         println!("b64decode [base64] -- Decodes Base64 user input into normal text.");
         println!("randint [seed] -- Generates a random number based on a seed.");
         println!("pci -- The PCI(e) utility.");
         println!("ahci -- The AHCI utility.");
+        println!("time -- Shows the current time and date.")
+    } else if command.trim() == "" {
+        println!();
     } else {
         println!("Unknown command: {}", command);
     }

@@ -78,16 +78,32 @@ pub fn decode_bytes(input: &[u8]) -> Result<Vec<u8>, ()> {
     let mut i = 0;
     while i < input.len() {
         let byte1 = input[i];
-        let byte2 = if i + 1 < input.len() { input[i + 1] } else { b'=' };
-        let byte3 = if i + 2 < input.len() { input[i + 2] } else { b'=' };
-        let byte4 = if i + 3 < input.len() { input[i + 3] } else { b'=' };
+        let byte2 = if i + 1 < input.len() {
+            input[i + 1]
+        } else {
+            b'='
+        };
+        let byte3 = if i + 2 < input.len() {
+            input[i + 2]
+        } else {
+            b'='
+        };
+        let byte4 = if i + 3 < input.len() {
+            input[i + 3]
+        } else {
+            b'='
+        };
 
         let index1 = decode_table[byte1 as usize];
         let index2 = decode_table[byte2 as usize];
         let index3 = decode_table[byte3 as usize];
         let index4 = decode_table[byte4 as usize];
 
-        if index1 == 255 || index2 == 255 || (byte3 != b'=' && index3 == 255) || (byte4 != b'=' && index4 == 255) {
+        if index1 == 255
+            || index2 == 255
+            || (byte3 != b'=' && index3 == 255)
+            || (byte4 != b'=' && index4 == 255)
+        {
             return Err(());
         }
 
@@ -113,7 +129,9 @@ pub fn decode_bytes(input: &[u8]) -> Result<Vec<u8>, ()> {
 /// Convert the encoded byte array to a String
 pub fn encoded_to_string(encoded: [u8; 128]) -> Result<String, FromUtf8Error> {
     // Find the length of the encoded data by checking for '=' characters
-    let len = encoded.iter().position(|&x| x == b'=') 
+    let len = encoded
+        .iter()
+        .position(|&x| x == b'=')
         .unwrap_or(encoded.len());
 
     // Create a byte slice of the valid encoded data
@@ -132,18 +150,28 @@ pub fn encode(bytes: &[u8]) -> String {
     let encoded_input = encode_bytes(bytes);
     match encoded_to_string(encoded_input) {
         Ok(result) => return result,
-        Err(e) => return format!("0_0  An error occured when trying to encode! {}", e.to_string()),
+        Err(e) => {
+            return format!(
+                "0_0  An error occured when trying to encode! {}",
+                e.to_string()
+            )
+        }
     }
 }
 
 pub fn decode(bytes: &[u8]) -> String {
     match decode_bytes(bytes) {
-        Ok(decoded_input) => {
-            match decoded_to_string(decoded_input) {
-                Ok(result) => return result,
-                Err(e) => return format!("0_0  An error occured when trying to decode! {}", e.to_string()),
+        Ok(decoded_input) => match decoded_to_string(decoded_input) {
+            Ok(result) => return result,
+            Err(e) => {
+                return format!(
+                    "0_0  An error occured when trying to decode! {}",
+                    e.to_string()
+                )
             }
         },
-        Err(e) => return format!("0_0  An error occured when trying to decode! {:?}", e).to_string(),
+        Err(e) => {
+            return format!("0_0  An error occured when trying to decode! {:?}", e).to_string()
+        }
     }
 }

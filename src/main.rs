@@ -6,37 +6,21 @@
 
 extern crate alloc;
 
+use alloc::{
+    borrow::ToOwned,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
+use bootloader::{entry_point, BootInfo};
+use core::panic::PanicInfo;
 use lemonade::{
     base64,
+    cmos::*,
     command_line::run_command_line,
-    pci,
     println,
-    randomness::*,
     sorting::quicksort,
-    task::{
-        executor::Executor,
-        keyboard,
-        Task
-    },
-    graphics::*,
-    disks::ahci::{*,self},
-};
-use alloc::borrow::ToOwned;
-use bootloader::{
-    entry_point,
-    BootInfo
-};
-use core::panic::PanicInfo;
-use alloc::{
-    string::{
-	String,
-	ToString
-    },
-    vec::Vec
-};
-use core::sync::atomic::{
-    AtomicUsize,
-    Ordering
+    task::{executor::Executor, Task},
 };
 
 entry_point!(kernel_main);
@@ -49,11 +33,15 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Lemonade 24m11");
     lemonade::init();
 
+    let time = Time::from_current();
+    println!("Current time is: {}", time);
+
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
 
-    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("(X_X)\n\nHeap initialization failed.");
+    allocator::init_heap(&mut mapper, &mut frame_allocator)
+        .expect("(X_X)\n\nHeap initialization failed.");
 
     #[cfg(test)]
     test_main();
@@ -67,9 +55,14 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    println!("(X_X)\n\nUh-oh! Lemonade panicked. Here's some info: {}", info);
+    println!(
+        "(X_X)\n\nUh-oh! Lemonade panicked. Here's some info: {}",
+        info
+    );
     lemonade::hlt_loop();
 }
+
+// TEST CODE STARTS HERE.
 
 /// This function is called on panic, while testing.
 #[cfg(test)]
@@ -102,7 +95,7 @@ fn string_modification() {
 
 #[test_case]
 fn true_is_true() {
-    assert_eq!(true,true);
+    assert_eq!(true, true);
 }
 
 #[test_case]
@@ -123,7 +116,7 @@ fn decoding_base64() {
 fn string_concatenation() {
     let string1 = "Hello";
     let string2 = "World";
-    let result = string1.to_owned()+string2;
+    let result = string1.to_owned() + string2;
 
     assert_eq!(result, "HelloWorld".to_string());
 }
@@ -137,33 +130,3 @@ fn str_equals_str() {
 fn str_doesnt_equal_str() {
     assert_ne!("this is an &str.", "this is an &str!");
 }
-
-/* I'm to lazy to make it work w/ GitHub workflows right now so uhh... FIX ME!
-#[test_case]
-fn test_ahci() {
-    let controllers: Vec<ahci::AHCIController> = ahci::scan_for_ahci_controllers(false);
-    let count = controllers.len();
-
-    let mut controllers_found: bool = false;
-    if count > 0 {
-	    controllers_found = true;
-    }
-
-    assert!(controllers_found, "Controllers were NOT found! Did you possibly forget to add the drive in the Qemu testing args?");
-
-    let mut used_ports: Vec<ahci::AHCIDevice> = Vec::new();
-    for controller in controllers.iter() {
-        let ports = scan_for_used_ports(&controller, false);
-        for port in ports {
-            used_ports.push(port);
-        }
-    }
-
-    let mut used_ports_found: bool = false;
-    if used_ports.len() > 0 {
-        used_ports_found = true;
-    }
-
-    assert!(used_ports_found, "Could NOT find any used AHCI ports!");
-}
-*/

@@ -1,4 +1,7 @@
-use alloc::{format, string::{String, ToString}};
+use alloc::{
+    format,
+    string::{String, ToString},
+};
 use x86_64::instructions::random::*;
 
 pub fn rand_u16() -> Result<Option<u16>, String> {
@@ -36,8 +39,12 @@ pub fn gen_range_u16(val1: u16, val2: u16) -> Result<Option<u16>, String> {
                 res = rand_u16();
             }
             return res;
-        },
-        Err(e) => return Err(format!("(-_-)  Unable to generate random range. Details: {}", e).to_string()),
+        }
+        Err(e) => {
+            return Err(
+                format!("(-_-)  Unable to generate random range. Details: {}", e).to_string(),
+            )
+        }
     }
 }
 

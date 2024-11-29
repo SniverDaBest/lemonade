@@ -1,15 +1,16 @@
 use super::Locked;
 use alloc::alloc::{GlobalAlloc, Layout};
+use core::sync::atomic::{AtomicBool, Ordering};
 use core::{
     mem,
     ptr::{self, NonNull},
 };
 use lazy_static::lazy_static;
-use core::sync::atomic::{AtomicBool, Ordering};
 use spin::Mutex;
 
 lazy_static! {
-    static ref ALLOCATOR: Mutex<FixedSizeBlockAllocator> = Mutex::new(FixedSizeBlockAllocator::new());
+    static ref ALLOCATOR: Mutex<FixedSizeBlockAllocator> =
+        Mutex::new(FixedSizeBlockAllocator::new());
 }
 
 pub fn get_allocator_instance() -> &'static Mutex<FixedSizeBlockAllocator> {
@@ -55,7 +56,8 @@ impl FixedSizeBlockAllocator {
     /// heap bounds are valid and that the heap is unused. This method must be
     /// called only once.
     pub unsafe fn init(&mut self, heap_start: usize, heap_size: usize) {
-        self.fallback_allocator.init(heap_start as *mut u8, heap_size);
+        self.fallback_allocator
+            .init(heap_start as *mut u8, heap_size);
     }
 
     /// Allocates using the fallback allocator.

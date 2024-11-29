@@ -12,5 +12,4 @@ I would be very grateful if people would contribute. However, I know that probab
 
 Here are some notes for the users, about bugs, and other things that may happen.
 1. You may get flooded with dots when running. That happens to me, and I don't know how to fix it.
-2. When typing, it may repeat what you've typed. That's normal. *(well... it's normal in the, "yes this is supposed to happen" area. it is still a bug)*
-3. True randomness is broken for some reason.
+2. True randomness is broken for some reason.

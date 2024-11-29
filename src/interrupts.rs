@@ -48,7 +48,7 @@ pub fn init_idt() {
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
-    println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+    println!("Exception: Breakpoint\n{:#?}", stack_frame);
 }
 
 extern "x86-interrupt" fn page_fault_handler(
@@ -58,10 +58,10 @@ extern "x86-interrupt" fn page_fault_handler(
     use x86_64::registers::control::Cr2;
 
     println!("(X_X)\n");
-    println!("EXCEPTION: PAGE FAULT");
+    println!("Exception: Page Fault");
     println!("Accessed Address: {:?}", Cr2::read());
     println!("Error Code: {:?}", error_code);
-    println!("{:#?}", stack_frame);
+    println!("Stack Frame:\n{:#?}", stack_frame);
     hlt_loop();
 }
 
@@ -69,7 +69,7 @@ extern "x86-interrupt" fn double_fault_handler(
     stack_frame: InterruptStackFrame,
     _error_code: u64,
 ) -> ! {
-    panic!("(X_X)\n\nEXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+    panic!("(X_X)\n\nException: Double Fault\n{:#?}", stack_frame);
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {

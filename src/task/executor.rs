@@ -87,7 +87,9 @@ impl TaskWaker {
     }
 
     fn wake_task(&self) {
-        self.task_queue.push(self.task_id).expect("0_0\n\nTask queue full");
+        self.task_queue
+            .push(self.task_id)
+            .expect("0_0\n\nTask queue full");
     }
 }
 

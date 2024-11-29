@@ -10,29 +10,25 @@ extern crate alloc;
 use core::panic::PanicInfo;
 
 pub mod allocator;
+pub mod base64;
+pub mod cmos;
+pub mod command_line;
+pub mod disks;
+pub mod fs;
 pub mod gdt;
 pub mod interrupts;
 pub mod memory;
+pub mod pci;
+pub mod randomness;
 pub mod serial;
+pub mod sorting;
 pub mod task;
 pub mod vga_buffer;
-pub mod randomness;
-pub mod base64;
-pub mod command_line;
-pub mod pci;
-pub mod disks;
-pub mod sorting;
-pub mod graphics;
-pub mod fs;
-//pub mod clock; // no workie D:
 
 pub fn init() {
     gdt::init();
     interrupts::init_idt();
-    //clock::initialize_pit();
     unsafe { interrupts::PICS.lock().initialize() };
-    //let mut idt = InterruptDescriptorTable::new();
-    //clock::init_idt(&mut idt);
     x86_64::instructions::interrupts::enable();
 }
 pub trait Testable {
