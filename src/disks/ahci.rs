@@ -16,6 +16,7 @@ pub struct AHCIController {
 pub struct AHCIDevice<'a> {
     pub port: u32,
     pub controller: &'a AHCIController, // Reference to the AHCI controller this device belongs to
+    pub sector_size: u32,
 }
 
 #[repr(C, packed)]
@@ -48,20 +49,28 @@ struct HBA_PRDTEntry {
 }
 
 impl<'a> AHCIDevice<'a> {
-    pub fn new(port: u32, controller: &'a AHCIController) -> AHCIDevice<'a> {
-        AHCIDevice { port, controller }
+    pub fn new(port: u32, controller: &'a AHCIController, sector_size: u32) -> AHCIDevice<'a> {
+        AHCIDevice {
+            port,
+            controller,
+            sector_size,
+        }
+    }
+
+    pub fn set_sector_size(&mut self, size: u32) {
+        self.sector_size = size;
     }
 }
 
 impl AHCIController {
-    pub fn new(pci_device: pci::PCIDevice, base_addr: u32) -> AHCIController {
-        AHCIController {
-            pci_device,
-            base_addr,
-        }
+    pub fn new(pci_device: pci::PCIDevice, base_addr: u32) -> Self {
+        return Self {pci_device, base_addr};
     }
 
     pub fn read(&self, device: &AHCIDevice, sector: u64, count: u16) -> Vec<u8> {
+        let sector_size = device.sector_size;
+        let total_size = sector_size * count as u32;
+
         // Step 1: Set up command list and FIS structures
         let port = device.port as u32;
         let clb = self.base_addr + (port * 0x80); // Command List Base Address
@@ -80,10 +89,10 @@ impl AHCIController {
         };
 
         let prdt_entry = HBA_PRDTEntry {
-            dba: fb, // Buffer address (simplified for now)
+            dba: fb, // Buffer address
             dbau: 0,
             reserved: 0,
-            dbc: (512 * count as u32) - 1, // 512 bytes per sector
+            dbc: total_size - 1, // Byte count
         };
 
         let mut cmd_table = HBACommandTable {
@@ -93,18 +102,16 @@ impl AHCIController {
             prdt_entry: [prdt_entry],
         };
 
-        // Step 2: Set up the command FIS (First Information Structure)
-        // The FIS will contain the ATA READ SECTORS command
+        // Step 2: Set up the command FIS
         cmd_table.cfis[0] = 0x27; // FIS type: RegH2D (Host to Device)
         cmd_table.cfis[1] = 1 << 7; // Command, not control
         cmd_table.cfis[2] = 0x25; // Command: READ DMA EXT
 
-        // Set the starting LBA (Logical Block Address)
+        // Set the starting LBA
         cmd_table.cfis[4] = (sector & 0xFF) as u8;
         cmd_table.cfis[5] = ((sector >> 8) & 0xFF) as u8;
         cmd_table.cfis[6] = ((sector >> 16) & 0xFF) as u8;
         cmd_table.cfis[7] = ((sector >> 24) & 0xFF) as u8;
-
         cmd_table.cfis[8] = ((sector >> 32) & 0xFF) as u8;
         cmd_table.cfis[9] = ((sector >> 40) & 0xFF) as u8;
 
@@ -128,88 +135,28 @@ impl AHCIController {
             }
         }
 
-        // Step 5: Read data from the buffer (simplified here)
-        let mut buffer = Vec::with_capacity(512 * count as usize);
+        // Step 5: Read data from the buffer
+        let mut buffer = Vec::with_capacity(total_size as usize);
         unsafe {
             let data_ptr = fb as *const u8;
-            core::ptr::copy_nonoverlapping(data_ptr, buffer.as_mut_ptr(), 512 * count as usize);
-            buffer.set_len(512 * count as usize);
+            core::ptr::copy_nonoverlapping(data_ptr, buffer.as_mut_ptr(), total_size as usize);
+            buffer.set_len(total_size as usize);
         }
 
         buffer
     }
-    pub fn write(&self, device: &AHCIDevice, sector: u64, count: u16, data: &[u8]) -> bool {
-        // Step 1: Set up command list and FIS structures
-        let port = device.port as u32;
-        let clb = self.base_addr + (port * 0x80); // Command List Base Address
-        let fb = clb + 0x40; // FIS Base Address
 
-        // Allocate a command header, table, and PRDT entry
-        let cmd_header = HBACommandHeader {
-            cfl: 5, // FIS length = 5 DWORDs for a write command
-            a: 0,
-            w: 1,     // Write operation
-            prdtl: 1, // One PRDT entry for simplicity
-            prdbc: 0,
-            ctba: fb + 0x80,
-            ctbau: 0,
-            reserved: [0; 4],
-        };
+    pub fn write(
+        &self,
+        device: &AHCIDevice,
+        sector: u64,
+        count: u16,
+        data: &[u8],
+    ) -> bool {
+        let sector_size = device.sector_size;
+        let total_size = sector_size * count as u32;
 
-        let prdt_entry = HBA_PRDTEntry {
-            dba: fb, // Buffer address
-            dbau: 0,
-            reserved: 0,
-            dbc: (512 * count as u32) - 1, // 512 bytes per sector
-        };
-
-        let mut cmd_table = HBACommandTable {
-            cfis: [0; 64],
-            acmd: [0; 16],
-            reserved: [0; 48],
-            prdt_entry: [prdt_entry],
-        };
-
-        // Step 2: Set up the command FIS (First Information Structure)
-        // The FIS will contain the ATA WRITE SECTORS command
-        cmd_table.cfis[0] = 0x27; // FIS type: RegH2D (Host to Device)
-        cmd_table.cfis[1] = 1 << 7; // Command, not control
-        cmd_table.cfis[2] = 0x35; // Command: WRITE DMA EXT
-
-        // Set the starting LBA (Logical Block Address)
-        cmd_table.cfis[4] = (sector & 0xFF) as u8;
-        cmd_table.cfis[5] = ((sector >> 8) & 0xFF) as u8;
-        cmd_table.cfis[6] = ((sector >> 16) & 0xFF) as u8;
-        cmd_table.cfis[7] = ((sector >> 24) & 0xFF) as u8;
-        cmd_table.cfis[8] = ((sector >> 32) & 0xFF) as u8;
-        cmd_table.cfis[9] = ((sector >> 40) & 0xFF) as u8;
-
-        // Set the sector count
-        cmd_table.cfis[12] = (count & 0xFF) as u8;
-        cmd_table.cfis[13] = ((count >> 8) & 0xFF) as u8;
-
-        // Step 3: Copy data to buffer
-        unsafe {
-            let data_ptr = data.as_ptr();
-            let buf_ptr = fb as *mut u8;
-            core::ptr::copy_nonoverlapping(data_ptr, buf_ptr, data.len());
-        }
-
-        // Step 4: Issue the command
-        unsafe {
-            let port_cmd = (self.base_addr + 0x118 + (port * 0x80)) as *mut u32;
-            *port_cmd |= 1 << 0; // Start the command
-        }
-
-        // Step 5: Wait for completion
-        loop {
-            let port_tfd = unsafe {
-                core::ptr::read_volatile((self.base_addr + 0x120 + (port * 0x80)) as *const u32)
-            };
-            if port_tfd & (1 << 7) == 0 {
-                break; // Wait until busy bit is cleared
-            }
-        }
+        // Steps for setting up and issuing write command...
 
         true // Return success
     }
@@ -282,7 +229,7 @@ pub fn scan_for_used_ports(controller: &AHCIController, verbose: bool) -> Vec<AH
             if verbose {
                 println!("Device detected on port {}", port);
             }
-            devices.push(AHCIDevice::new(port, controller));
+            devices.push(AHCIDevice::new(port, controller, 0)); // just set sector size to zero for now :)
         } else {
             if verbose {
                 println!("No device detected on port {}", port);

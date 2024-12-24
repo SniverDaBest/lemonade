@@ -93,7 +93,7 @@ void read_rtc() {
             day = (day & 0x0F) + ((day / 16) * 10);
             month = (month & 0x0F) + ((month / 16) * 10);
             year = (year & 0x0F) + ((year / 16) * 10);
-            if(century_register != 0) {
+            if (century_register != 0) {
                   century = (century & 0x0F) + ((century / 16) * 10);
             }
       }

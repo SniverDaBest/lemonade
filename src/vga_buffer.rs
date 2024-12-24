@@ -1,5 +1,3 @@
-#![feature(fmt_internals)]
-
 use core::fmt::{self, Debug};
 use lazy_static::lazy_static;
 use spin::Mutex;

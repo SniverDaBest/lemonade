@@ -48,7 +48,7 @@ impl fmt::Display for PCIDevice {
 
 /// Writes to a certain PCI device, at a certain offset.
 pub fn write_pci(offset: u8, pci_device: &PCIDevice, value: u32) {
-    let address = (1 << 31) 
+    let address = (1 << 31)
         | ((pci_device.bus as u32) << 16)
         | ((pci_device.slot as u32) << 11)  // Slot should be correct
         | ((pci_device.func as u32) << 8)
@@ -65,10 +65,10 @@ pub fn write_pci(offset: u8, pci_device: &PCIDevice, value: u32) {
 
 /// Reads from a certain PCI device, at a certain offset.
 pub fn read_pci(offset: u8, pci_device: &PCIDevice) -> u32 {
-    let address = (1 << 31) 
-        | ((pci_device.bus as u32) << 16) 
+    let address = (1 << 31)
+        | ((pci_device.bus as u32) << 16)
         | ((pci_device.slot as u32) << 11)  // This should be slot instead of device_id
-        | ((pci_device.func as u32) << 8) 
+        | ((pci_device.func as u32) << 8)
         | ((offset as u32) & 0xFC);
 
     unsafe {

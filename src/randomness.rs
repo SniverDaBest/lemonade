@@ -31,11 +31,11 @@ pub fn rand_u64() -> Result<Option<u64>, String> {
     }
 }
 
-pub fn gen_range_u16(val1: u16, val2: u16) -> Result<Option<u16>, String> {
+pub fn gen_range_u16(min: u16, max: u16) -> Result<Option<u16>, String> {
     let mut res = rand_u16();
     match res {
         Ok(r) => {
-            while r.unwrap() < val1 && r.unwrap() > val2 {
+            while r.unwrap() < min && r.unwrap() > max {
                 res = rand_u16();
             }
             return res;
@@ -66,9 +66,9 @@ impl Xorshift32 {
         x
     }
 
-    pub fn gen_range(&mut self, val1: u32, val2: u32) -> u32 {
+    pub fn gen_range(&mut self, min: u32, max: u32) -> u32 {
         let mut res = self.next();
-        while res >= val1 && res <= val2 {
+        while res >= min && res <= max {
             res = self.next();
         }
         return res;

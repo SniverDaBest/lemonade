@@ -1,11 +1,11 @@
 # Highest Priority
-- Filesystem Access
 - Fix the dots
 
 # Medium Priority
 - Fix bug where clearing the screen too much breaks it
     - Note: It seems to only be when doing it *fast*. If you do it *slower* then you probably won't cause the crash.
-- Use `GRUB` over the `bootloader` crate.
+- Use `GRUB` over the `bootloader` crate, or update the bootloader crate.
+- Other (better) filesystems
 
 # Low Priority
 - Fix AHCI Reading and Writing

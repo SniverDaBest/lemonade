@@ -7,15 +7,8 @@ extern "C" {
     pub static day: c_uchar;
     pub static month: c_uchar;
     pub static year: c_int;
-
-    fn out_byte(port: c_int, value: c_int);
-    fn in_byte(port: c_int) -> c_int;
-
     pub static cmos_address: c_int;
     pub static cmos_data: c_int;
-
-    fn get_update_in_progress_flag() -> c_int;
-    fn get_RTC_register(reg: c_int) -> c_uchar;
     pub fn read_rtc();
 }
 

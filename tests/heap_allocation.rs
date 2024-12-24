@@ -36,17 +36,6 @@ fn simple_allocation() {
     assert_eq!(*heap_value_2, 13);
 }
 
-/*
-#[test_case]
-fn large_vec() {
-    let n = 1000;
-    let mut vec = Vec::new();
-    for i in 0..n {
-        vec.push(i);
-    }
-    assert_eq!(vec.iter().sum::<u64>(), (n - 1) * n / 2);
-}
-*/
 #[test_case]
 fn many_boxes() {
     for i in 0..HEAP_SIZE {

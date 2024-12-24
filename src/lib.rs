@@ -9,6 +9,7 @@
 extern crate alloc;
 use core::panic::PanicInfo;
 
+pub mod acpi;
 pub mod allocator;
 pub mod base64;
 pub mod cmos;
@@ -16,14 +17,16 @@ pub mod command_line;
 pub mod disks;
 pub mod fs;
 pub mod gdt;
+pub mod hashmaps;
 pub mod interrupts;
 pub mod memory;
 pub mod pci;
 pub mod randomness;
 pub mod serial;
 pub mod sorting;
+pub mod spinlock;
 pub mod task;
-pub mod vga_buffer;
+pub mod vga_buffer; // ... it should be called ACPI'm going to bash my skull into my wall for the 28th time today watching these builds fail...
 
 pub fn init() {
     gdt::init();
