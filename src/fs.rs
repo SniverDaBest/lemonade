@@ -75,9 +75,9 @@ pub fn get_disk_size() -> u32 {
     // Using BIOS interrupt 0x13 to get disk size
     unsafe {
         asm!(
-            "movb $0x08, %ah",          // BIOS function 0x08: Get drive parameters
-            "movb $0x80, %dl",          // Select first hard disk (0x80)
-            "int $0x13",                // BIOS interrupt 0x13
+            "mov ah, 0x08",          // BIOS function 0x08: Get drive parameters
+            "mov dl, 0x80",          // Select first hard disk (0x80)
+            "int 0x13",                // BIOS interrupt 0x13
             inout("dx") sector_count => sector_count,
             options(nostack, preserves_flags)
         );
