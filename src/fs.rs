@@ -113,7 +113,7 @@ pub fn check_if_fat32(boot_sector: &FATBootSector) -> bool {
             + root_dir_sectors);
     let cluster_count = data_sec / boot_sector.bpb_sec_per_clus as u32;
 
-    cluster_count >= 4085 && cluster_count >= 65525
+    cluster_count >= 65525
 }
 
 pub fn compute_fat_entry(boot_sector: &FATBootSector, cluster_number: u32) -> u32 {
