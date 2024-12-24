@@ -64,7 +64,7 @@ jobs:
       - name: Cleanup (Windows)
         if: runner.os == 'Windows'
         run: |
-          Remove-Item Cargo.lock, target -Force -Recurse
+          Remove-Item Cargo.lock -Force -Recurse
         shell: pwsh
       - name: Install Rust Toolchain
         uses: actions-rs/toolchain@v1
@@ -118,7 +118,7 @@ jobs:
       - name: Cleanup (Windows)
         if: runner.os == 'Windows'
         run: |
-          Remove-Item Cargo.lock, target -Force -Recurse
+          Remove-Item Cargo.lock -Force -Recurse
         shell: pwsh
       - name: Install Rust Toolchain
         uses: actions-rs/toolchain@v1
