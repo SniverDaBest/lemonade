@@ -22,6 +22,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+      - name: Cleanup
+        run: |
+          rm -rf Cargo.lock
+          rm -rf target
       - name: Install Rust Toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -46,6 +50,12 @@ jobs:
         ]
     runs-on: ${{ matrix.platform }}
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Cleanup
+        run: |
+          rm -rf Cargo.lock
+          rm -rf target
       - name: Install Rust Toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -53,8 +63,6 @@ jobs:
           toolchain: nightly
       - name: Install bootimage
         run: cargo install bootimage --debug
-      - name: Checkout Repository
-        uses: actions/checkout@v2
       - name: Install Rustup Components
         run: rustup component add rust-src llvm-tools-preview
       - name: Run `cargo bootimage`
@@ -93,6 +101,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+      - name: Cleanup
+        run: |
+          rm -rf Cargo.lock
+          rm -rf target
       - name: Install Rust Toolchain
         uses: actions-rs/toolchain@v1
         with:
