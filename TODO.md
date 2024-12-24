@@ -1,5 +1,5 @@
 # Highest Priority
-- Filesystem Access
+- Filesystem Access (almost done! :D)
 - Fix the dots
 
 # Medium Priority
