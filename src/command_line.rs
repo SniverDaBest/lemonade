@@ -1,5 +1,5 @@
 use crate::{
-    base64, cmos::*, dbg, disks::ahci::*, pci, print, println, randomness, task::keyboard,
+    acpi, base64, cmos::*, dbg, disks::ahci::*, pci, print, println, randomness, task::keyboard,
     vga_buffer::WRITER,
 };
 use alloc::{
@@ -48,7 +48,7 @@ pub async fn run_command_line() {
                             }
                         }
                         DecodedKey::RawKey(_) => {
-                            // impl if needed
+                            
                         }
                     }
                 }
@@ -290,7 +290,7 @@ fn process_command(command: &str) {
         println!("randint [seed] -- Generates a random number based on a seed.");
         println!("pci -- The PCI(e) utility.");
         println!("ahci -- The AHCI utility.");
-        println!("time -- Shows the current time and date.")
+        println!("time -- Shows the current time and date.");
     } else if command.trim() == "" {
         println!();
     } else {

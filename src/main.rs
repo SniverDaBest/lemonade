@@ -15,6 +15,7 @@ use alloc::{
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use lemonade::{
+    acpi,
     base64,
     cmos::*,
     command_line::run_command_line,
@@ -30,7 +31,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use lemonade::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    println!("Lemonade 24m11");
+    println!("Lemonade 25m1"); // this should ALWAYS print when booting up. if it doesn't, something's VERY fucked.
     lemonade::init();
 
     let time = Time::from_current();
@@ -42,6 +43,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     allocator::init_heap(&mut mapper, &mut frame_allocator)
         .expect("(X_X)\n\nHeap initialization failed.");
+
+    unsafe {
+        acpi::map_acpi_region(&mut mapper, &mut frame_allocator);
+    }
+
 
     #[cfg(test)]
     test_main();

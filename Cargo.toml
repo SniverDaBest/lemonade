@@ -1,6 +1,6 @@
 [package]
 name = "lemonade"
-version = "24.12.0"
+version = "25.1.0"
 authors = ["SniverDaBest <sniverdabest@proton.me>"]
 edition = "2018"
 
@@ -20,8 +20,8 @@ bootloader = { version="0.9", features=["map_physical_memory"] }
 volatile = "0.2.6"
 spin = "0.5.2"
 x86_64 = "0.14.2"
-uart_16550 = "0.2.0"
-pic8259 = "0.10.1"
+uart_16550 = "0.3.2"
+pic8259 = "0.11.0"
 pc-keyboard = "0.8.0"
 linked_list_allocator = "0.10.2"
 vcell = "0.1.3"
@@ -37,7 +37,7 @@ default-features = false
 features = ["alloc"]
 
 [dependencies.conquer-once]
-version = "0.3.2"
+version = "0.4.0"
 default-features = false
 
 [dependencies.futures-util]

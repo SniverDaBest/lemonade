@@ -47,6 +47,19 @@ pub fn init_idt() {
     IDT.load();
 }
 
+/// ### DO NOT USE THIS!!!
+/// Would NOT recommend using this. As you may be able to tell, it doesn't stop the CPU.\
+/// It continues, and uhh... it's very broken.
+extern "x86-interrupt" fn drunk_page_fault_handler(stack_frame: InterruptStackFrame, error_code: PageFaultErrorCode) {
+    use x86_64::registers::control::Cr2;
+
+    println!("(o_0) Drunk!\n");
+    println!("Exception: Page Fault");
+    println!("Accessed Address: {:?}", Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("Stack Frame:\n{:#?}", stack_frame);
+}
+
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("Exception: Breakpoint\n{:#?}", stack_frame);
 }
