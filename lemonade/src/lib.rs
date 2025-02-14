@@ -87,15 +87,22 @@ pub fn hlt_loop() -> ! {
 }
 
 #[cfg(test)]
-use bootloader::{entry_point, BootInfo};
+use bootloader_api::{entry_point, BootInfo, config::{BootloaderConfig, Mapping}};
 use x86_64::structures::idt::InterruptDescriptorTable;
 
 #[cfg(test)]
-entry_point!(test_kernel_main);
+static TEST_BOOTLOADER_CONFIG: BootloaderConfig = {
+    let mut config = BootloaderConfig::new_default();
+    config.mappings.phystical_memory = Some(Mapping::Dynamic);
+    return config;
+};
+
+#[cfg(test)]
+entry_point!(test_kernel_main, config=&TEST_BOOTLOADER_CONFIG);
 
 /// Entry point for `cargo xtest`
 #[cfg(test)]
-fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
+fn test_kernel_main(_boot_info: &'static mut BootInfo) -> ! {
     init();
     test_main();
     hlt_loop();

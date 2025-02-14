@@ -1,138 +1,15 @@
-#![no_std]
-#![no_main]
-#![feature(custom_test_frameworks)]
-#![test_runner(lemonade::test_runner)]
-#![reexport_test_harness_main = "test_main"]
+fn main() {
+	let uefi_path = env!("UEFI_PATH");
+	let bios_path = env!("BIOS_PATH");
+	let uefi = true;
 
-extern crate alloc;
-
-use alloc::{
-    borrow::ToOwned,
-    string::{String, ToString},
-    vec,
-    vec::Vec,
-};
-use bootloader::{entry_point, BootInfo};
-use core::panic::PanicInfo;
-use lemonade::{
-    acpi,
-    base64,
-    cmos::*,
-    command_line::run_command_line,
-    println,
-    sorting::quicksort,
-    task::{executor::Executor, Task},
-};
-
-entry_point!(kernel_main);
-
-fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use lemonade::allocator;
-    use lemonade::memory::{self, BootInfoFrameAllocator};
-    use x86_64::VirtAddr;
-
-    println!("Lemonade 25m1"); // this should ALWAYS print when booting up. if it doesn't, something's VERY fucked.
-    lemonade::init();
-
-    let time = Time::from_current();
-    println!("Current time is: {}", time);
-
-    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
-    let mut mapper = unsafe { memory::init(phys_mem_offset) };
-    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
-
-    allocator::init_heap(&mut mapper, &mut frame_allocator)
-        .expect("(X_X)\n\nHeap initialization failed.");
-
-    unsafe {
-        acpi::map_acpi_region(&mut mapper, &mut frame_allocator);
-    }
-
-
-    #[cfg(test)]
-    test_main();
-
-    let mut executor = Executor::new();
-    executor.spawn(Task::new(run_command_line()));
-    executor.run();
-}
-
-/// This function is called on panic.
-#[cfg(not(test))]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    println!(
-        "(X_X)\n\nUh-oh! Lemonade panicked. Here's some info: {}",
-        info
-    );
-    lemonade::hlt_loop();
-}
-
-// TEST CODE STARTS HERE.
-
-/// This function is called on panic, while testing.
-#[cfg(test)]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    lemonade::test_panic_handler(info)
-}
-
-#[test_case]
-fn trivial_assertion() {
-    assert_eq!(1, 1);
-}
-
-#[test_case]
-fn basic_math() {
-    let mut number = 5;
-    number += 5;
-    number -= 1;
-    number *= 5;
-    number /= 5;
-    assert_eq!(number, 9);
-}
-
-#[test_case]
-fn string_modification() {
-    let mut s = "sample string #1";
-    s = "sample string #2";
-    assert_eq!(s, "sample string #2");
-}
-
-#[test_case]
-fn true_is_true() {
-    assert_eq!(true, true);
-}
-
-#[test_case]
-fn encoding_base64() {
-    let input = b"Hello, world!";
-    let expected = "SGVsbG8sIHdvcmxkIQ";
-    assert_eq!(base64::encode(input), expected);
-}
-
-#[test_case]
-fn decoding_base64() {
-    let input = b"SGVsbG8sIHdvcmxkIQ";
-    let expected = "Hello, world!";
-    assert_eq!(base64::decode(input), expected.to_string());
-}
-
-#[test_case]
-fn string_concatenation() {
-    let string1 = "Hello";
-    let string2 = "World";
-    let result = string1.to_owned() + string2;
-
-    assert_eq!(result, "HelloWorld".to_string());
-}
-
-#[test_case]
-fn str_equals_str() {
-    assert_eq!("this is an &str", "this is an &str");
-}
-
-#[test_case]
-fn str_doesnt_equal_str() {
-    assert_ne!("this is an &str.", "this is an &str!");
+	let mut cmd = std::process::Command::new("qemu-system-x86_64");
+	if uefi {
+		cmd.arg("-bios").arg(ovmf_prebuilt::ovmf_pure_efi());
+		cmd.arg("-drive").arg(format!("format=raw,file={uefi_path}"));
+	} else {
+		cmd.arg("-drive").arg(format!("format=raw,file={bios_path}"));
+	}
+	let mut child = cmd.spawn().unwrap();
+	child.wait().unwrap();
 }
