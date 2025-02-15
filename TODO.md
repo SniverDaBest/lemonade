@@ -1,10 +1,10 @@
 # Highest Priority
-- Fix the dots
+- Use `GRUB` over the `bootloader` crate, or update the bootloader crate. *(note: worked on in this branch)*
 
 # Medium Priority
 - Fix bug where clearing the screen too much breaks it
     - Note: It seems to only be when doing it *fast*. If you do it *slower* then you probably won't cause the crash.
-- Use `GRUB` over the `bootloader` crate, or update the bootloader crate.
+- Fix the dots
 - Other (better) filesystems
 
 # Low Priority
