@@ -1,11 +1,11 @@
 [package]
 name = "lemonade_bootloader"
-version = "0.1.0-blt.3" # blt as in bootloader testing, not bacon lettuce tomato.
+version = "0.1.0-blt.4" # blt as in bootloader testing, not bacon lettuce tomato.
 edition = "2018"
 
 [build-dependencies]
 bootloader = "0.11.10"
-lemonade = { path = "lemonade" }
+lemonade = { path = "lemonade", artifact = "bin", target = "x86_64-unknown-none" }
 
 [dependencies]
 ovmf-prebuilt = { version = "0.1.0-alpha.1" }
