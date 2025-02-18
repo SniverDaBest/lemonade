@@ -1,5 +1,3 @@
-#![no_std]
-
 const CURRENT_YEAR: u16 = 2024;
 
 static mut CENTURY_REGISTER: u8 = 0x00;

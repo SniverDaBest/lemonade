@@ -13,6 +13,8 @@
 
 import os
 import sys
+import hashlib
+import subprocess
 args = sys.argv
 
 if len(args) < 2:
@@ -21,5 +23,94 @@ if len(args) < 2:
     print("build run   -- Builds & runs QEMU.")
     exit(1)
 
-print("TODO")
-exit(1)
+def hashFiles():
+    files = []
+    hashes = {}
+    for file in os.listdir("src"):
+        if file.endswith(".rs"):
+            files.append("src/"+file)
+    for file in files:
+        with open(file, "rb") as f:
+            hashes[file] = hashlib.sha1(f.read(), usedforsecurity=False).hexdigest()
+            f.close()
+    return hashes
+
+def storableDict(data: dict):
+    ret = ""
+    for x in data:
+        ret += f"{x}={data[x]}|"
+    return ret
+
+def storableDictReverter(data: str):
+    ret = {}
+    for item in data.split("|"):
+        name, info = item.split("=")
+        ret[name] = info
+    return ret
+
+def checkDifferences():
+    if os.path.exists(".bs_data"):
+        hashes = hashFiles()
+        with open(".bs_data", "r") as f:
+            bsdata = f.read()
+            f.close()
+        return storableDict(hashes) == bsdata
+    else:
+        return True
+
+def runCmd(cmd: str):
+    return subprocess.run(cmd.split(" "), capture_output=True, text=True)
+
+def build():
+    cmd = runCmd("cargo build")
+    if cmd.returncode != 0:
+        print(f"Unable to build!\nExit Code: {cmd.returncode}\nstderr:\n{cmd.stderr}")
+        exit(1)
+    print(cmd.stdout)
+    grub_cfg_contents = """
+set timeout=5
+set default=0
+
+menuentry "Lemonade" {
+    multiboot2 /boot/lemonade
+    boot
+}
+"""
+    if not os.path.exists("iso/boot/grub"): runCmd("mkdir -p iso/boot/grub")
+    with open("iso/boot/grub/grub.cfg", "w") as f:
+        f.write(grub_cfg_contents)
+        f.close()
+    runCmd("cp target/x86_64-unknown-none/lemonade iso/boot/lemonade")
+    grubcmd = runCmd("grub2-mkrescue -o lemonade.iso iso")
+    if grubcmd.returncode != 0:
+        print(f"grub2-mkrescue failed!\nExit Code: {grubcmd.returncode}\nstderr:\n{grubcmd.stderr}")
+        exit(1)
+    print(grubcmd.stdout)
+    with open(".bs_data", "w") as f:
+        f.write(storableDict(hashFiles()))
+        f.close()
+
+def run():
+    if checkDifferences() or not os.path.exists("target/") or not os.path.exists("lemonade.iso"): build()
+    else: print("no need to build. running...")
+
+    if runCmd("qemu-system-x86_64 lemonade.iso -m 64m").returncode != 0:
+        print("Something went wrong when running Qemu!")
+        exit(1)
+
+if __name__ == "__main__":
+    if "--help" in args or "-h" in args:
+        print("Usage:")
+        print("build build -- Builds the ISO")
+        print("build run   -- Builds & runs QEMU.")
+        exit()
+    elif "run" in args and not "build" in args:
+        run()
+    elif not "run" in args and "build" in args:
+        build()
+    elif "run" in args and "build" in args:
+        print("You can't build & run!")
+        exit(1)
+    elif not "run" in args and not "build" in args:
+        print("You need to build or run!")
+        exit(1)

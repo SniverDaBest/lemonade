@@ -12,7 +12,7 @@ use alloc::{
     vec,
     vec::Vec,
 };
-use bootloader_api::{entry_point, BootInfo, info::{MemoryRegions,MemoryRegion}, config::{BootloaderConfig, Mapping}};
+use multiboot2::{BootInformation, BootInformationHeader};
 use core::{panic::PanicInfo, ops::Deref};
 use lemonade::{
     acpi,
@@ -24,21 +24,17 @@ use lemonade::{
     task::{executor::Executor, Task},
 };
 
-pub static BOOTLOADER_CONFIG: BootloaderConfig = {
-    let mut config = BootloaderConfig::new_default();
-    config.mappings.physical_memory = Some(Mapping::Dynamic);
-    config
-};
+entry_point!(kernel_main);
 
-entry_point!(kernel_main, config=&BOOTLOADER_CONFIG);
-
-fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+fn kernel_main(boot_info: BootInformation) -> ! {
     use lemonade::allocator;
     use lemonade::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
     println!("Lemonade 25m2"); // this should ALWAYS print when booting up. if it doesn't, something's VERY fucked.
     lemonade::init();
+
+    let cmd = boot_info.command_line_tag();
 
     let time = Time::from_current();
     println!("Current time is: {}", time);

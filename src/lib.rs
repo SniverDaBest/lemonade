@@ -8,6 +8,7 @@
 
 extern crate alloc;
 use core::panic::PanicInfo;
+use multiboot2::{BootInformation, BootInformationHeader};
 
 pub mod acpi;
 pub mod allocator;
@@ -26,14 +27,16 @@ pub mod serial;
 pub mod sorting;
 pub mod spinlock;
 pub mod task;
-pub mod vga_buffer; // ... it should be called ACPI'm going to bash my skull into my wall for the 28th time today watching these builds fail...
+pub mod vga_buffer;
 
 #[macro_export]
 macro_rules! entry_point {
-    ($path:path) => {
+    ($path:path, boot_info: BootInformation) => {
         #[export_name = "_start"]
-        pub extern "C" fn _kernel_start() -> ! {
-            $path()
+        pub extern "C" fn _kernel_start(mb_magic: u32, mbi_ptr: u32) -> ! {
+            if mb_magic != multiboot2::MAGIC { panic!("(X_X)  Multiboot2 magic given is incorrect!"); }
+            let boot_info = BootInformation::load(mbi_ptr as *const BootInformationHeader);
+            $path(boot_info)
         }
     };
 }

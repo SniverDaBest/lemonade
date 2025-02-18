@@ -1,5 +1,3 @@
-use bootloader_api::info::{MemoryRegion, MemoryRegionKind};
-type MemoryMap = &'static [MemoryRegion];
 use x86_64::{
     structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB},
     PhysAddr, VirtAddr,
