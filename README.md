@@ -5,7 +5,7 @@ Lemonade itself should NOT be used in production, and it probably never should. 
 
 ## Requirements
 - Cargo
-- grub-bootimage (installable through `cargo install grub-bootimage`)
+- Python
 <!-- END OF LIST><-->
 
 # Contributions
