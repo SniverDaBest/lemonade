@@ -1,0 +1,25 @@
+#!/usr/bin/python3
+
+"""
++==========================================+
+| This is the build script for Lemonade.   |
+| You can't run it through cargo, as it's  |
+| missing some features. This will autorun |
+| QEMU when ran like "build run". It will  |
+| only build the ISO file when ran like    |
+| "build build".                           |
++==========================================+
+"""
+
+import os
+import sys
+args = sys.argv
+
+if len(args) < 2:
+    print("Usage:")
+    print("build build -- Builds the ISO")
+    print("build run   -- Builds & runs QEMU.")
+    exit(1)
+
+print("TODO")
+exit(1)

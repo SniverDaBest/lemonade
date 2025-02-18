@@ -28,6 +28,16 @@ pub mod spinlock;
 pub mod task;
 pub mod vga_buffer; // ... it should be called ACPI'm going to bash my skull into my wall for the 28th time today watching these builds fail...
 
+#[macro_export]
+macro_rules! entry_point {
+    ($path:path) => {
+        #[export_name = "_start"]
+        pub extern "C" fn _kernel_start() -> ! {
+            $path()
+        }
+    };
+}
+
 pub fn init() {
     gdt::init();
     interrupts::init_idt();
@@ -87,22 +97,14 @@ pub fn hlt_loop() -> ! {
 }
 
 #[cfg(test)]
-use bootloader_api::{entry_point, BootInfo, config::{BootloaderConfig, Mapping}};
 use x86_64::structures::idt::InterruptDescriptorTable;
 
 #[cfg(test)]
-static TEST_BOOTLOADER_CONFIG: BootloaderConfig = {
-    let mut config = BootloaderConfig::new_default();
-    config.mappings.phystical_memory = Some(Mapping::Dynamic);
-    return config;
-};
-
-#[cfg(test)]
-entry_point!(test_kernel_main, config=&TEST_BOOTLOADER_CONFIG);
+entry_point!(test_kernel_main);
 
 /// Entry point for `cargo xtest`
 #[cfg(test)]
-fn test_kernel_main(_boot_info: &'static mut BootInfo) -> ! {
+fn test_kernel_main() -> ! {
     init();
     test_main();
     hlt_loop();

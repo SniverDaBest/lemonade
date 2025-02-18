@@ -3,6 +3,11 @@ Lemonade is an OS built in rust, based off of blog_os, created by [Phil-Opp](htt
 \
 Lemonade itself should NOT be used in production, and it probably never should. It's not even working much yet. It builds *(probably)*, but there are some bugs, and a lot of absolute garbage code that I wrote. *(note: I'm not a good programmer...)*
 
+## Requirements
+- Cargo
+- grub-bootimage (installable through `cargo install grub-bootimage`)
+<!-- END OF LIST><-->
+
 # Contributions
 I would be very grateful if people would contribute. However, I know that probably won't happen much, or even at all... Also, I will try and look through issues/PRs on GitHub, that get opened.
 
