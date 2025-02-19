@@ -1,5 +1,5 @@
-# !! WARNING !!
-Lemonade **DOES NOT** build at the moment. I'm working on things in [new-bootloader-testing](https://github.com/SniverDaBest/lemonade/tree/new-bootloader-testing). I'm going to update the bootloader crate, as Rust had changes, which broke some critical parts of the OS.\
+>[!WARNING]
+Lemonade **DOES NOT** build at the moment. I'm working on things in [new-bootloader-testing](https://github.com/SniverDaBest/lemonade/tree/new-bootloader-testing). I'm going to get rid of the bootloader crate, and use GRand Unified Bootloader 2 (GRUB2) instead, as Rust had changes, which broke some critical parts of the OS.\
 Don't worry, I'll *probably* get a working build... soon-*ish*. It'll be a while though.
 
 # Info
