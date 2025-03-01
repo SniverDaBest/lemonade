@@ -1,6 +1,5 @@
 >[!WARNING]
-Lemonade **DOES NOT** build at the moment. I'm working on things in [new-bootloader-testing](https://github.com/SniverDaBest/lemonade/tree/new-bootloader-testing). I'm going to get rid of the bootloader crate, and use GRand Unified Bootloader 2 (GRUB2) instead, as Rust had changes, which broke some critical parts of the OS.\
-Don't worry, I'll *probably* get a working build... soon-*ish*. It'll be a while though.
+Lemonade is being moved to a new repo. It will now be called `Lemoncake`. Instead of being known as refreshing, it should be known as light, and delicious.
 
 # Info
 Lemonade is an OS built in Rust, based off of blog_os, created by [Phil-Opp](https://github.com/phil-opp/blog_os). The blog he created helps people who love Rust, learn how to run it on bare metal, and make an OS. You can find it at <https://os.phil-opp.com/>. I would recommend it to people who want to get better at using Rust, and learning a `no_std` environment.\
